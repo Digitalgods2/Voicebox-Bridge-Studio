@@ -204,6 +204,13 @@ class YouTubeSourceCache:
                 return {"ok": True, "active": False, "invalid": True, "error": str(exc)}
             return self._public_status(manifest)
 
+    def resolve_active_source(self) -> Path:
+        """Return the validated active source video without exposing its path."""
+        with self._lock:
+            self._recover_locked()
+            _manifest, media = self._entry_locked()
+            return media
+
     def clear(self) -> dict[str, Any]:
         with self._lock:
             self._recover_locked()
@@ -297,4 +304,6 @@ class YouTubeSourceCache:
             "last_used_at": manifest["last_used_at"],
             "hit_count": manifest["hit_count"],
             "validated": bool(manifest.get("validated")),
+            "source_media_url": "/api/media/youtube-cache/source",
+            "source_filename": manifest.get("media_file"),
         }

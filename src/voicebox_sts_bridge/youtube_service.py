@@ -766,6 +766,13 @@ class YouTubeJobService:
     def cache_status(self) -> dict[str, Any]:
         return self.cache.status()
 
+    def resolve_cached_source(self) -> Path:
+        """Resolve the validated active YouTube source for local retrieval."""
+        try:
+            return self.cache.resolve_active_source()
+        except YouTubeCacheError as exc:
+            raise YouTubeJobError(str(exc)) from exc
+
     def clear_cache(self) -> dict[str, Any]:
         if not self._pipeline_lock.acquire(blocking=False):
             raise YouTubeJobError("The YouTube cache cannot be cleared while a video job is running")

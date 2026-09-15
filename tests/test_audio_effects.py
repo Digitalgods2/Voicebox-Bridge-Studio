@@ -198,10 +198,12 @@ class AdjustmentUiContractTests(unittest.TestCase):
         self.assertIn("Waiting for durable job status", page)
         self.assertIn('id="youtube-cache-summary"', page)
         self.assertIn('id="youtube-cache-clear"', page)
+        self.assertIn('id="youtube-cache-source"', page)
         self.assertIn("Convert using cached video", page)
         self.assertIn("youtube-source-cache-v1", page)
         self.assertIn('id="local-video-input"', page)
         self.assertIn('id="local-video-player"', page)
+        self.assertIn('id="video-source-download"', page)
         self.assertIn("/api/video-inputs", page)
         self.assertIn("/api/video/jobs", page)
         self.assertIn("local-video-upload-v1", page)
@@ -256,12 +258,18 @@ class AdjustmentUiContractTests(unittest.TestCase):
                 if route.path == "/api/video/jobs" and "POST" in route.methods
             )
             help_route = next(route for route in app.routes if route.path == "/help.html")
+            youtube_source_route = next(
+                route
+                for route in app.routes
+                if route.path == "/api/media/youtube-cache/source"
+            )
 
             response = route.endpoint()
             cache_status = cache_route.endpoint()
             clear_status = clear_route.endpoint()
             local_status = local_status_route.endpoint()
             help_page = help_route.endpoint()
+            self.assertIsNotNone(youtube_source_route)
 
         self.assertEqual(response["version"], __version__)
         self.assertIn("resilient-video-polling-v1", response["features"])

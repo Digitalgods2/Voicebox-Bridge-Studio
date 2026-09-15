@@ -500,6 +500,7 @@
             <div class="section-heading">
               <p id="youtube-cache-heading" class="eyebrow">Single-video download cache</p>
               <button id="youtube-cache-clear" class="secondary" type="button" disabled>Clear cache</button>
+              <a id="youtube-cache-source" class="download-link" href="#" download hidden>Save original YouTube source</a>
             </div>
             <p id="youtube-cache-summary" class="status" role="status" aria-live="polite">Checking local cache…</p>
           </div>
@@ -615,6 +616,7 @@
             Your browser does not support video playback.
           </video>
           <a id="video-download" class="download-link" href="#" download hidden>Open or save the video output</a>
+          <a id="video-source-download" class="download-link" href="#" download hidden>Save original imported video</a>
           <div class="pipeline-monitor" aria-label="Latest video pipeline status">
             <div class="pipeline-row"><span>Current stage</span><strong id="pipeline-stage">Waiting for a video job</strong></div>
             <progress id="pipeline-progress" max="100" value="0"></progress>
@@ -712,6 +714,7 @@
     const youtubeEngine = document.querySelector('#youtube-engine');
     const youtubeCacheSummary = document.querySelector('#youtube-cache-summary');
     const youtubeCacheClearButton = document.querySelector('#youtube-cache-clear');
+    const youtubeCacheSourceDownload = document.querySelector('#youtube-cache-source');
     const youtubeUrl = document.querySelector('#youtube-url');
     const youtubeOutputFormat = document.querySelector('#youtube-output-format');
     const youtubeAuthorized = document.querySelector('#youtube-authorized');
@@ -740,6 +743,7 @@
     const videoPlayer = document.querySelector('#video-player');
     const videoPlayerLabel = document.querySelector('#video-player-label');
     const videoDownload = document.querySelector('#video-download');
+    const videoSourceDownload = document.querySelector('#video-source-download');
     const videoJobBadge = document.querySelector('#video-job-badge');
     const pipelineStage = document.querySelector('#pipeline-stage');
     const pipelineProgress = document.querySelector('#pipeline-progress');
@@ -868,12 +872,20 @@
         youtubeCacheSummary.className = 'status ok';
         youtubeCardBadge.textContent = `cached · ${youtubeCache.video_id}`;
         youtubeCardBadge.className = 'stage-tag mini-badge ok';
+        youtubeCacheSourceDownload.href = youtubeCache.source_media_url || '/api/media/youtube-cache/source';
+        const sourceName = youtubeCache.source_filename || 'source.mkv';
+        youtubeCacheSourceDownload.download = `voicebox-original-${youtubeCache.video_id}${sourceName.includes('.') ? sourceName.slice(sourceName.lastIndexOf('.')) : '.mkv'}`;
+        youtubeCacheSourceDownload.hidden = false;
       } else if (youtubeCache.invalid) {
+        youtubeCacheSourceDownload.hidden = true;
+        youtubeCacheSourceDownload.href = '#';
         youtubeCacheSummary.textContent = 'The cached download is invalid and will be replaced on the next job.';
         youtubeCacheSummary.className = 'status bad';
         youtubeCardBadge.textContent = 'cache invalid';
         youtubeCardBadge.className = 'stage-tag mini-badge bad';
       } else {
+        youtubeCacheSourceDownload.hidden = true;
+        youtubeCacheSourceDownload.href = '#';
         youtubeCacheSummary.textContent = 'No cached video. The next authorized job will download and cache one.';
         youtubeCacheSummary.className = 'status';
         youtubeCardBadge.textContent = 'cache empty';
@@ -1122,6 +1134,21 @@
       videoDownload.textContent = `Open or save the ${outputFormat.toUpperCase()} output`;
       videoDownload.hidden = false;
       videoPlayerLabel.textContent = job.video?.title || `Completed job ${job.job_id}`;
+      if (job.source_type === 'local_upload' && job.video_input_id) {
+        const sourceUrl = `/api/media/video-inputs/${encodeURIComponent(job.video_input_id)}`;
+        const sourceName = job.original_name || 'imported-video';
+        showImportedVideo({
+          media_url: sourceUrl,
+          original_name: sourceName,
+          video_input_id: job.video_input_id,
+        });
+        videoSourceDownload.href = sourceUrl;
+        videoSourceDownload.download = sourceName;
+        videoSourceDownload.hidden = false;
+      } else {
+        videoSourceDownload.hidden = true;
+        videoSourceDownload.href = '#';
+      }
       videoJobBadge.textContent = 'completed';
       videoJobBadge.className = 'mini-badge ok';
       pipelineStage.textContent = 'Completed and fully decoded';
@@ -1137,6 +1164,31 @@
       localVideoDownload.download = upload.original_name || 'imported-video';
       localVideoDownload.hidden = false;
       localVideoPlayerLabel.textContent = upload.original_name || 'Imported video';
+    }
+
+    function persistImportedVideo(upload) {
+      try {
+        localStorage.setItem(
+          'voicebox-sts-latest-video-source',
+          JSON.stringify({
+            video_input_id: upload.video_input_id,
+            original_name: upload.original_name || 'imported-video',
+          }),
+        );
+      } catch { /* The source link still works for the current page. */ }
+    }
+
+    function restoreImportedVideo() {
+      try {
+        const saved = JSON.parse(localStorage.getItem('voicebox-sts-latest-video-source') || 'null');
+        if (!saved?.video_input_id) return;
+        uploadedVideo = {
+          video_input_id: saved.video_input_id,
+          original_name: saved.original_name || 'imported-video',
+          media_url: `/api/media/video-inputs/${encodeURIComponent(saved.video_input_id)}`,
+        };
+        showImportedVideo(uploadedVideo);
+      } catch { /* A stale or unavailable browser entry is ignored. */ }
     }
 
     async function refreshYouTubeCache() {
@@ -1345,6 +1397,7 @@
         setDependency(dependencyFfprobe, 'FFprobe', false, 'unavailable');
       }
       updateActions();
+      restoreImportedVideo();
       const previousVideoJob = localStorage.getItem('voicebox-sts-latest-video-job');
       if (previousVideoJob) {
         try {
@@ -1456,6 +1509,7 @@
           throw new Error('Video upload response did not include a video input ID.');
         }
         uploadedVideo = { ...body, original_name: file.name };
+        persistImportedVideo(uploadedVideo);
         localVideoUploadProgress.value = 100;
         setStatus(localVideoUploadStatus, `${file.name} imported and ready.`, 'ok');
         showImportedVideo(uploadedVideo);

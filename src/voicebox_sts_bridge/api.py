@@ -407,6 +407,15 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     def youtube_cache_status() -> dict[str, Any]:
         return youtube.cache_status()
 
+    @app.get("/api/media/youtube-cache/source", response_class=FileResponse)
+    def youtube_cache_source_media() -> FileResponse:
+        try:
+            return media_response(youtube.resolve_cached_source())
+        except FileNotFoundError as exc:
+            raise HTTPException(status_code=404, detail=str(exc)) from exc
+        except YouTubeJobError as exc:
+            raise HTTPException(status_code=404, detail=str(exc)) from exc
+
     @app.delete("/api/youtube/cache")
     def clear_youtube_cache() -> dict[str, Any]:
         try:

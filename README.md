@@ -518,7 +518,7 @@ The conversion engine must be able to decode the contents of the selected input 
 
 The URL validator rejects arbitrary hosts, HTTP URLs, credentials, custom ports, playlists without a direct video, channels, and search pages. yt-dlp is configured for one item and ignores user-level yt-dlp configuration files.
 
-The cache is keyed by the canonical YouTube video ID, so equivalent Watch, Shorts, Embed, Live-recording, and `youtu.be` links reuse the same source. The cache panel shows its title, size, and reuse count. **Clear cache** removes only the cached source; completed MKV/MP4 outputs and durable job records are preserved. Rights confirmation remains mandatory on cache hits.
+The cache is keyed by the canonical YouTube video ID, so equivalent Watch, Shorts, Embed, Live-recording, and `youtu.be` links reuse the same source. The cache panel shows its title, size, and reuse count. **Clear cache** removes only the cached source; completed MKV/MP4 outputs and durable job records are preserved. Rights confirmation remains mandatory on cache hits. Use **Save original YouTube source** beside the cache controls to retrieve a copy before clearing or replacing the cached source.
 
 ### Convert a video from this PC
 
@@ -530,7 +530,7 @@ The cache is keyed by the canonical YouTube video ID, so equivalent Watch, Short
 6. Follow extraction, chunk conversion, exact-timing reconstruction, optional pitch/tone processing, lossless remux, and full validation progress.
 7. When complete, play or save the selected MKV or MP4 output used by the YouTube workflow.
 
-Imported videos are streamed to UUID-named files under `data/video_inputs/`; the browser never sends an arbitrary filesystem path to the conversion API. The default video upload safety limit is 12 GiB. Imported sources do not affect the single-video YouTube download cache.
+Imported videos are streamed to UUID-named files under `data/video_inputs/`; the browser never sends an arbitrary filesystem path to the conversion API. The default video upload safety limit is 12 GiB. Imported sources do not affect the single-video YouTube download cache. After a local video job completes, **Save original imported video** appears beside the converted output so the original can be retrieved without browsing internal storage. Source links are restored after page refresh while the managed source remains available.
 
 ## Long-video pipeline
 
@@ -598,6 +598,7 @@ Interactive OpenAPI documentation is available at <http://127.0.0.1:8765/docs> w
 | `GET` | `/api/youtube/jobs/{job_id}` | Read durable job status and chunk progress |
 | `GET` | `/api/media/inputs/{input_id}` | Stream an uploaded source with byte-range support |
 | `GET` | `/api/media/video-inputs/{video_input_id}` | Stream an imported video with byte-range support |
+| `GET` | `/api/media/youtube-cache/source` | Stream the active validated YouTube source with byte-range support |
 | `GET` | `/api/media/outputs/{job_id}` | Stream a converted WAV |
 | `GET` | `/api/media/references/{profile_id}/{sample_id}` | Stream a cached VoiceBox reference |
 | `GET` | `/api/media/video-jobs/{job_id}` | Stream or save a completed MKV or MP4 output |

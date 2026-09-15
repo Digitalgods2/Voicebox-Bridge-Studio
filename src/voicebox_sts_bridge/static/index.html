@@ -102,6 +102,23 @@
       background: #0b0913;
       box-shadow: inset 0 0 0 1px rgb(255 255 255 / 8%);
     }
+    .help-link {
+      position: relative;
+      z-index: 1;
+      display: inline-flex;
+      align-items: center;
+      min-height: 30px;
+      padding: .35rem .75rem;
+      border: 1px solid #4f4773;
+      border-radius: 999px;
+      color: var(--muted-strong);
+      background: rgb(255 255 255 / 4%);
+      font: 700 .72rem/1 var(--mono);
+      text-decoration: none;
+      text-transform: uppercase;
+      letter-spacing: .04em;
+    }
+    .help-link:hover { border-color: var(--cyan); color: #fff; background: rgb(65 223 244 / 10%); }
     h1 { margin: 0; font-size: clamp(1.65rem, 3vw, 2.2rem); letter-spacing: -.045em; }
     h2 { margin: 0; font-size: 1.08rem; letter-spacing: -.015em; }
     p { line-height: 1.55; }
@@ -329,6 +346,7 @@
         <span id="header-engine" class="service-pill" data-state="checking">openvoice</span>
         <span id="header-media" class="service-pill" data-state="checking">ffmpeg</span>
         <span id="header-version" class="version-pill">loading</span>
+        <a class="help-link" href="/help.html" target="_blank" rel="noopener noreferrer">Help</a>
       </div>
     </header>
 

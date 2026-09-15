@@ -213,6 +213,10 @@ class AdjustmentUiContractTests(unittest.TestCase):
         self.assertIn('id="header-media"', page)
         self.assertIn('id="pipeline-progress"', page)
         self.assertIn('id="dependency-ffmpeg"', page)
+        self.assertIn('href="/help.html"', page)
+        self.assertIn('target="_blank"', page)
+        self.assertIn('id="youtube-output-format"', page)
+        self.assertIn('id="local-video-output-format"', page)
         self.assertIn("--violet: #a970ff", page)
         self.assertIn("--pink: #ff5eac", page)
         self.assertIn("--cyan: #41dff4", page)
@@ -251,11 +255,13 @@ class AdjustmentUiContractTests(unittest.TestCase):
                 for route in app.routes
                 if route.path == "/api/video/jobs" and "POST" in route.methods
             )
+            help_route = next(route for route in app.routes if route.path == "/help.html")
 
             response = route.endpoint()
             cache_status = cache_route.endpoint()
             clear_status = clear_route.endpoint()
             local_status = local_status_route.endpoint()
+            help_page = help_route.endpoint()
 
         self.assertEqual(response["version"], __version__)
         self.assertIn("resilient-video-polling-v1", response["features"])
@@ -264,6 +270,9 @@ class AdjustmentUiContractTests(unittest.TestCase):
         self.assertIn("clean-ui-labels-v1", response["features"])
         self.assertIn("production-console-ui-v1", response["features"])
         self.assertIn("secure-openvoice-runtime-v1", response["features"])
+        self.assertIn("video-output-formats-v1", response["features"])
+        self.assertIn("<title>VoiceBox STS Sidecar Help</title>", help_page)
+        self.assertIn("Input and output formats", help_page)
         self.assertFalse(cache_status["active"])
         self.assertFalse(clear_status["cleared"])
         self.assertIn("ffmpeg", local_status["checks"])

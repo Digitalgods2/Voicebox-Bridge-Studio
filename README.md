@@ -45,15 +45,6 @@ Implemented:
 - responsive desktop/mobile web UI and a one-click Windows launcher.
 - vivid, stage-specific visual language with real-time VoiceBox, OpenVoice, media-tool, cache, and job-state indicators;
 
-Not implemented:
-
-- dialogue/background source separation;
-- conversion of only the dialogue stem while retaining an untouched music/effects bed;
-- automatic recovery of an in-progress GPU job after the bridge process itself is terminated;
-- DRM-protected, private, age-restricted, or account-cookie YouTube workflows;
-- a packaged desktop executable or installer;
-- subjective guarantees about voice identity or emotional similarity.
-
 ## Why a sidecar?
 
 VoiceBox cloned profiles are not RVC `.pth` models. A profile contains metadata, one or more reference recordings, and their transcripts. VoiceBox's installed Qwen, Chatterbox, LuxTTS, or other weights are shared TTS engines rather than per-speaker speech-to-speech models.
@@ -185,6 +176,8 @@ cmd /c start-bridge.bat --check
 ```
 
 Open the UI directly at <http://127.0.0.1:8765>. If something looks wrong and there is no console to read (the compiled app), expand the **Diagnostics** panel at the bottom of the page for a live tail of the log file, or use the tray icon's **View Logs**.
+
+Click **Help** in the homepage header for the full offline user guide. It opens in a separate browser tab so you can close it or return to the application without losing your place.
 
 ## Complete installation from a fresh clone
 

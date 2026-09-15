@@ -142,6 +142,11 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         page = Path(__file__).with_name("static") / "index.html"
         return page.read_text(encoding="utf-8")
 
+    @app.get("/help.html", response_class=HTMLResponse, include_in_schema=False)
+    def help_page() -> str:
+        page = Path(__file__).with_name("static") / "help.html"
+        return page.read_text(encoding="utf-8")
+
     @app.get("/api/version", include_in_schema=False)
     def version() -> dict[str, Any]:
         return {

@@ -41,6 +41,20 @@ _YOUTUBE_HOSTS = {
     "youtu.be",
 }
 _VIDEO_SUFFIXES = {".mkv", ".mp4", ".webm", ".mov"}
+_VIDEO_OUTPUT_FORMATS = {
+    "mkv": {
+        "suffix": ".mkv",
+        "container": "Matroska",
+        "audio_codec": "flac",
+        "audio_label": "lossless FLAC",
+    },
+    "mp4": {
+        "suffix": ".mp4",
+        "container": "MPEG-4",
+        "audio_codec": "aac",
+        "audio_label": "AAC",
+    },
+}
 _MODEL_SAMPLE_RATE = 22_050
 _MODEL_FRAME_SIZE = 256
 
@@ -54,6 +68,13 @@ def _uuid(value: str, label: str) -> str:
         return str(UUID(value))
     except (ValueError, TypeError, AttributeError) as exc:
         raise ValueError(f"{label} must be a UUID") from exc
+
+
+def _video_output_format(value: str | None) -> str:
+    normalized = str(value or "mkv").strip().lower().lstrip(".")
+    if normalized not in _VIDEO_OUTPUT_FORMATS:
+        raise ValueError("output_format must be either 'mkv' or 'mp4'")
+    return normalized
 
 
 def validate_youtube_url(value: str) -> str:
@@ -291,8 +312,14 @@ class YouTubeJobService:
             "node_version": node_version,
             "ffmpeg": self.ffmpeg_path,
             "ffprobe": self.ffprobe_path,
-            "output_container": "Matroska",
-            "output_audio_codec": "FLAC",
+            "supported_output_formats": {
+                name: {
+                    "container": spec["container"],
+                    "audio_codec": spec["audio_label"],
+                }
+                for name, spec in _VIDEO_OUTPUT_FORMATS.items()
+            },
+            "default_output_format": "mkv",
             "video_reencoded": False,
             "model_sample_rate_hz": _MODEL_SAMPLE_RATE,
             "cache": self.cache.status(),
@@ -312,8 +339,14 @@ class YouTubeJobService:
             "checks": checks,
             "ffmpeg": self.ffmpeg_path,
             "ffprobe": self.ffprobe_path,
-            "output_container": "Matroska",
-            "output_audio_codec": "FLAC",
+            "supported_output_formats": {
+                name: {
+                    "container": spec["container"],
+                    "audio_codec": spec["audio_label"],
+                }
+                for name, spec in _VIDEO_OUTPUT_FORMATS.items()
+            },
+            "default_output_format": "mkv",
             "video_reencoded": False,
             "model_sample_rate_hz": _MODEL_SAMPLE_RATE,
         }
@@ -328,6 +361,7 @@ class YouTubeJobService:
         pitch_semitones: float = 0.0,
         brightness_db: float = 0.0,
         authorized: bool = False,
+        output_format: str = "mkv",
     ) -> dict[str, Any]:
         if authorized is not True:
             raise ValueError("You must confirm that you own or have permission to process this video")
@@ -339,6 +373,8 @@ class YouTubeJobService:
         if not math.isfinite(value_tau) or not 0.0 <= value_tau <= 1.0:
             raise ValueError("tau must be between 0 and 1")
         pitch, brightness = validate_audio_adjustments(pitch_semitones, brightness_db)
+        output_format = _video_output_format(output_format)
+        output_spec = _VIDEO_OUTPUT_FORMATS[output_format]
 
         status = self.status()
         if not status["ready"]:
@@ -368,6 +404,7 @@ class YouTubeJobService:
             "tau": value_tau,
             "pitch_semitones": pitch,
             "brightness_db": brightness,
+            "output_format": output_format,
             "authorized": True,
             "cache": {
                 "candidate_hit": cache_candidate,
@@ -380,13 +417,14 @@ class YouTubeJobService:
             "quality": {
                 "inference_precision": "fp32",
                 "intermediate_audio": "PCM s16le",
-                "output_audio": "lossless FLAC",
+                "output_audio": output_spec["audio_label"],
+                "output_container": output_spec["container"],
                 "video": "stream copy (no re-encode)",
                 "model_sample_rate_hz": _MODEL_SAMPLE_RATE,
                 "pitch_engine": "FFmpeg Rubber Band high-quality, formants preserved",
                 "tone_filter": "2.5 kHz high shelf",
             },
-            "output_video": str(job_dir / "output.mkv"),
+            "output_video": str(job_dir / f"output{output_spec['suffix']}"),
             "media_url": f"/api/media/video-jobs/{job_id}",
         }
         _atomic_json(job_dir / "manifest.json", manifest)
@@ -404,6 +442,7 @@ class YouTubeJobService:
         pitch_semitones: float = 0.0,
         brightness_db: float = 0.0,
         authorized: bool = False,
+        output_format: str = "mkv",
     ) -> dict[str, Any]:
         if authorized is not True:
             raise ValueError("You must confirm that you own or have permission to process this video")
@@ -414,6 +453,8 @@ class YouTubeJobService:
         if not math.isfinite(value_tau) or not 0.0 <= value_tau <= 1.0:
             raise ValueError("tau must be between 0 and 1")
         pitch, brightness = validate_audio_adjustments(pitch_semitones, brightness_db)
+        output_format = _video_output_format(output_format)
+        output_spec = _VIDEO_OUTPUT_FORMATS[output_format]
         if not isinstance(original_name, str) or not original_name.strip():
             raise ValueError("original_name is required")
 
@@ -456,6 +497,7 @@ class YouTubeJobService:
             "tau": value_tau,
             "pitch_semitones": pitch,
             "brightness_db": brightness,
+            "output_format": output_format,
             "authorized": True,
             "cache": {
                 "candidate_hit": False,
@@ -467,13 +509,14 @@ class YouTubeJobService:
             "quality": {
                 "inference_precision": "fp32",
                 "intermediate_audio": "PCM s16le",
-                "output_audio": "lossless FLAC",
+                "output_audio": output_spec["audio_label"],
+                "output_container": output_spec["container"],
                 "video": "stream copy (no re-encode)",
                 "model_sample_rate_hz": _MODEL_SAMPLE_RATE,
                 "pitch_engine": "FFmpeg Rubber Band high-quality, formants preserved",
                 "tone_filter": "2.5 kHz high shelf",
             },
-            "output_video": str(job_dir / "output.mkv"),
+            "output_video": str(job_dir / f"output{output_spec['suffix']}"),
             "media_url": f"/api/media/video-jobs/{job_id}",
         }
         _atomic_json(job_dir / "manifest.json", manifest)
@@ -486,6 +529,8 @@ class YouTubeJobService:
             if manifest.get("status") == "completed":
                 return
             try:
+                output_format = _video_output_format(manifest.get("output_format"))
+                output_spec = _VIDEO_OUTPUT_FORMATS[output_format]
                 source_type = str(manifest.get("source_type") or "youtube")
                 first_stage = (
                     "validating_local_video"
@@ -610,7 +655,42 @@ class YouTubeJobService:
                             "Post-processed audio frame count does not match the extracted source"
                         )
 
-                output_video = job_dir / "output.mkv"
+                output_video = job_dir / f"output{output_spec['suffix']}"
+                remux_args = [
+                    self.ffmpeg_path,
+                    "-y",
+                    "-v",
+                    "error",
+                    "-i",
+                    str(source_video),
+                    "-i",
+                    str(converted_wav),
+                    "-map",
+                    "0:v:0",
+                    "-map",
+                    "1:a:0",
+                    "-map_metadata",
+                    "0",
+                    "-map_chapters",
+                    "0",
+                    "-c:v",
+                    "copy",
+                    "-c:a",
+                    output_spec["audio_codec"],
+                ]
+                if output_format == "mkv":
+                    remux_args.extend(["-map", "0:s?", "-c:s", "copy"])
+                else:
+                    remux_args.extend(["-b:a", "192k", "-movflags", "+faststart"])
+                remux_args.extend(
+                    [
+                        "-af",
+                        f"apad=whole_dur={source_duration:.6f}",
+                        "-t",
+                        f"{source_duration:.6f}",
+                        str(output_video),
+                    ]
+                )
                 self._update(
                     job_id,
                     stage="remuxing_video",
@@ -619,38 +699,8 @@ class YouTubeJobService:
                     post_processing=post_processing,
                 )
                 self._run_ffmpeg(
-                    [
-                        self.ffmpeg_path,
-                        "-y",
-                        "-v",
-                        "error",
-                        "-i",
-                        str(source_video),
-                        "-i",
-                        str(converted_wav),
-                        "-map",
-                        "0:v:0",
-                        "-map",
-                        "1:a:0",
-                        "-map",
-                        "0:s?",
-                        "-map_metadata",
-                        "0",
-                        "-map_chapters",
-                        "0",
-                        "-c:v",
-                        "copy",
-                        "-c:a",
-                        "flac",
-                        "-c:s",
-                        "copy",
-                        "-af",
-                        f"apad=whole_dur={source_duration:.6f}",
-                        "-t",
-                        f"{source_duration:.6f}",
-                        str(output_video),
-                    ],
-                    "lossless video remux",
+                    remux_args,
+                    f"{output_format.upper()} video remux",
                 )
                 self._update(job_id, stage="validating_output", progress_percent=97.0)
                 output_probe = self._probe(output_video)
@@ -666,8 +716,18 @@ class YouTubeJobService:
                 if source_video_codec != output_video_codec:
                     raise YouTubeJobError("Output video codec changed; stream-copy fidelity check failed")
                 output_audio_codec = self._first_codec(output_probe, "audio")
-                if output_audio_codec != "flac":
-                    raise YouTubeJobError("Output audio is not lossless FLAC")
+                if output_audio_codec != output_spec["audio_codec"]:
+                    raise YouTubeJobError(
+                        f"Output audio codec is not {output_spec['audio_label']}"
+                    )
+                format_name = str(output_probe.get("format", {}).get("format_name") or "").lower()
+                expected_format_names = (
+                    ("matroska", "webm") if output_format == "mkv" else ("mp4", "mov")
+                )
+                if not any(name in format_name for name in expected_format_names):
+                    raise YouTubeJobError(
+                        f"Output container is not the requested {output_format.upper()} format"
+                    )
 
                 completed_at = _utc_now()
                 self._update(
@@ -688,7 +748,8 @@ class YouTubeJobService:
                         "output_timeline_seconds": output_duration,
                         "timeline_delta_seconds": round(timeline_delta, 6),
                         "video_stream_copied": True,
-                        "output_audio_codec": "flac",
+                        "output_audio_codec": output_spec["audio_codec"],
+                        "output_format": output_format,
                         "pitch_and_tone_timing_preserved": True,
                     },
                 )
@@ -868,7 +929,9 @@ class YouTubeJobService:
 
     def resolve_output(self, job_id: str) -> Path:
         job_id = _uuid(job_id, "job_id")
-        path = self._job_dir(job_id) / "output.mkv"
+        manifest = self._read_manifest(job_id)
+        output_format = _video_output_format(manifest.get("output_format"))
+        path = self._job_dir(job_id) / f"output{_VIDEO_OUTPUT_FORMATS[output_format]['suffix']}"
         try:
             resolved = path.resolve(strict=True)
         except FileNotFoundError as exc:

@@ -203,20 +203,31 @@ class YouTubeJobPipelineTests(unittest.TestCase):
                 command = [str(item) for item in command]
                 if "-show_entries" in command:
                     target = Path(command[-1])
-                    output = target.name == "output.mkv"
+                    output = target.name.startswith("output.")
+                    output_format = "mp4" if target.suffix == ".mp4" else "matroska"
                     payload = {
-                        "format": {"duration": "11.1", "size": str(target.stat().st_size)},
+                        "format": {
+                            "duration": "11.1",
+                            "size": str(target.stat().st_size),
+                            "format_name": output_format,
+                        },
                         "streams": [
                             {"index": 0, "codec_type": "video", "codec_name": "h264"},
-                            {"index": 1, "codec_type": "audio", "codec_name": "flac" if output else "aac"},
+                            {
+                                "index": 1,
+                                "codec_type": "audio",
+                                "codec_name": ("aac" if target.suffix == ".mp4" else "flac")
+                                if output
+                                else "aac",
+                            },
                         ],
                     }
                     return subprocess.CompletedProcess(command, 0, json.dumps(payload), "")
                 destination = Path(command[-1])
                 if destination.name == "source.wav":
                     write_wave(destination, source_frames)
-                elif destination.name == "output.mkv":
-                    destination.write_bytes(b"mock lossless remux")
+                elif destination.name.startswith("output."):
+                    destination.write_bytes(b"mock video remux")
                 return subprocess.CompletedProcess(command, 0, "", "")
 
             engine = FakeBatchEngine()
@@ -273,14 +284,18 @@ class YouTubeJobPipelineTests(unittest.TestCase):
                 sample_id,
                 pitch_semitones=-1,
                 brightness_db=-2,
+                output_format="mp4",
                 authorized=True,
             )
+            self.assertEqual(rerun["output_format"], "mp4")
             self.assertTrue(rerun["cache"]["candidate_hit"])
             service.run_job(rerun["job_id"])
             rerun_completed = service.get_job(rerun["job_id"])
 
             self.assertEqual(len(download_calls), 1)
             self.assertTrue(rerun_completed["cache"]["hit"])
+            self.assertEqual(rerun_completed["validation"]["output_format"], "mp4")
+            self.assertEqual(rerun_completed["validation"]["output_audio_codec"], "aac")
             self.assertEqual(rerun_completed["download"]["status"], "cache_hit")
             self.assertEqual(service.cache_status()["hit_count"], 1)
             self.assertEqual(len(engine.calls), 2)
@@ -312,15 +327,22 @@ class YouTubeJobPipelineTests(unittest.TestCase):
                 command = [str(item) for item in command]
                 if "-show_entries" in command:
                     target = Path(command[-1])
-                    output = target.name == "output.mkv"
+                    output = target.name.startswith("output.")
+                    output_format = "mp4" if target.suffix == ".mp4" else "matroska"
                     payload = {
-                        "format": {"duration": "11.1", "size": str(target.stat().st_size)},
+                        "format": {
+                            "duration": "11.1",
+                            "size": str(target.stat().st_size),
+                            "format_name": output_format,
+                        },
                         "streams": [
                             {"index": 0, "codec_type": "video", "codec_name": "h264"},
                             {
                                 "index": 1,
                                 "codec_type": "audio",
-                                "codec_name": "flac" if output else "aac",
+                                "codec_name": ("aac" if target.suffix == ".mp4" else "flac")
+                                if output
+                                else "aac",
                             },
                         ],
                     }
@@ -328,8 +350,8 @@ class YouTubeJobPipelineTests(unittest.TestCase):
                 destination = Path(command[-1])
                 if destination.name == "source.wav":
                     write_wave(destination, source_frames)
-                elif destination.name == "output.mkv":
-                    destination.write_bytes(b"mock local lossless remux")
+                elif destination.name.startswith("output."):
+                    destination.write_bytes(b"mock local video remux")
                 return subprocess.CompletedProcess(command, 0, "", "")
 
             engine = FakeBatchEngine()

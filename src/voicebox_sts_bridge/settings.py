@@ -39,6 +39,9 @@ class Settings:
     request_timeout_seconds: float = 15.0
     max_reference_bytes: int = 100 * 1024 * 1024
     engine_device: str = "cuda:0"
+    video_job_retention_days: int = 30
+    failed_video_job_retention_hours: int = 24
+    orphan_video_input_retention_hours: int = 24
 
     def __post_init__(self) -> None:
         object.__setattr__(self, "voicebox_base_url", _validate_loopback_url(self.voicebox_base_url))
@@ -50,6 +53,13 @@ class Settings:
             raise ValueError("Request timeout must be positive")
         if self.max_reference_bytes <= 0:
             raise ValueError("Maximum reference size must be positive")
+        for value, label in (
+            (self.video_job_retention_days, "Video job retention days"),
+            (self.failed_video_job_retention_hours, "Failed video job retention hours"),
+            (self.orphan_video_input_retention_hours, "Orphan video input retention hours"),
+        ):
+            if isinstance(value, bool) or not isinstance(value, int) or value <= 0:
+                raise ValueError(f"{label} must be a positive integer")
         if not isinstance(self.engine_device, str) or _DEVICE_PATTERN.fullmatch(self.engine_device) is None:
             raise ValueError("Engine device must be 'cpu', 'cuda', or 'cuda:<index>'")
         object.__setattr__(self, "data_dir", Path(self.data_dir).resolve())
@@ -63,4 +73,19 @@ class Settings:
             bridge_port=int(os.getenv("BRIDGE_PORT", str(defaults.bridge_port))),
             data_dir=Path(os.getenv("BRIDGE_DATA_DIR", str(defaults.data_dir))),
             engine_device=os.getenv("BRIDGE_ENGINE_DEVICE", defaults.engine_device),
+            video_job_retention_days=int(
+                os.getenv("BRIDGE_VIDEO_JOB_RETENTION_DAYS", str(defaults.video_job_retention_days))
+            ),
+            failed_video_job_retention_hours=int(
+                os.getenv(
+                    "BRIDGE_FAILED_VIDEO_JOB_RETENTION_HOURS",
+                    str(defaults.failed_video_job_retention_hours),
+                )
+            ),
+            orphan_video_input_retention_hours=int(
+                os.getenv(
+                    "BRIDGE_ORPHAN_VIDEO_INPUT_RETENTION_HOURS",
+                    str(defaults.orphan_video_input_retention_hours),
+                )
+            ),
         )

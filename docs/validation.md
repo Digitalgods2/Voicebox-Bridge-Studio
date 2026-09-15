@@ -28,7 +28,7 @@ This repository records functional outcomes without publishing host paths, Windo
 - Multi-chunk reconstruction produced exactly the extracted source-audio frame count.
 - Chunk overlaps are trimmed before placement, preventing cumulative timeline drift.
 - The original video stream is copied without re-encoding.
-- Converted audio is stored as lossless FLAC in Matroska.
+- The default converted-video output stores audio as lossless FLAC in Matroska; the optional MP4 output stores audio as AAC for broader compatibility.
 - Completed output passes full audio/video decode validation before a job is marked successful.
 
 ## Local-only quality review

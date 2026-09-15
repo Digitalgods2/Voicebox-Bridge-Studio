@@ -476,7 +476,7 @@
             </div>
             <span id="youtube-card-badge" class="stage-tag mini-badge">checking cache</span>
           </div>
-          <p class="muted">Downloads one authorized video, converts its soundtrack in overlapping lossless chunks, and remuxes the exact-length result without re-encoding the video.</p>
+          <p class="muted">Downloads one authorized video, converts its soundtrack in overlapping chunks, and remuxes the exact-length result without re-encoding the video.</p>
           <p id="youtube-engine" class="status" role="status" aria-live="polite">Checking YouTube tools…</p>
           <div class="cache-panel" aria-labelledby="youtube-cache-heading">
             <div class="section-heading">
@@ -487,6 +487,11 @@
           </div>
           <label for="youtube-url">YouTube video URL</label>
           <input id="youtube-url" type="url" inputmode="url" autocomplete="url" placeholder="https://www.youtube.com/watch?v=…">
+          <label for="youtube-output-format">Video output format</label>
+          <select id="youtube-output-format">
+            <option value="mkv">MKV — lossless FLAC audio (default)</option>
+            <option value="mp4">MP4 — AAC audio (broad compatibility)</option>
+          </select>
           <div class="checkbox-row">
             <input id="youtube-authorized" type="checkbox">
             <label for="youtube-authorized">I own this video or have permission to download and convert it.</label>
@@ -513,7 +518,7 @@
             </div>
             <span class="stage-tag mini-badge">12 GiB · no yt-dlp</span>
           </div>
-          <p class="muted">Choose an authorized local video. It uses the same lossless extraction, overlapping STS chunks, exact-timing reconstruction, pitch/tone controls, stream-copy video, and FLAC remux used for YouTube.</p>
+          <p class="muted">Choose an authorized local video. It uses the same lossless extraction, overlapping STS chunks, exact-timing reconstruction, pitch/tone controls, and stream-copy video as YouTube. Choose MKV for lossless FLAC audio or MP4 for AAC compatibility.</p>
           <p id="local-video-engine" class="status" role="status" aria-live="polite">Checking local video tools...</p>
           <label for="local-video-input" class="sr-only">Authorized local video file</label>
           <input id="local-video-input" type="file" accept="video/*,.avi,.m2ts,.m4v,.mkv,.mov,.mp4,.mpeg,.mpg,.ts,.webm,.wmv" hidden>
@@ -521,6 +526,11 @@
             <button id="choose-local-video" type="button">Choose video from this PC...</button>
             <span id="local-video-name" class="file-name">No file selected</span>
           </div>
+          <label for="local-video-output-format">Video output format</label>
+          <select id="local-video-output-format">
+            <option value="mkv">MKV — lossless FLAC audio (default)</option>
+            <option value="mp4">MP4 — AAC audio (broad compatibility)</option>
+          </select>
           <progress id="local-video-upload-progress" max="100" value="0" hidden></progress>
           <p id="local-video-upload-status" class="status" role="status" aria-live="polite"></p>
           <div class="checkbox-row">
@@ -577,7 +587,7 @@
         <section class="card player-card output-video-card" aria-labelledby="video-player-heading">
           <div class="player-heading">
             <div>
-              <p class="eyebrow">Lossless master</p>
+              <p class="eyebrow">Video output</p>
               <h2 id="video-player-heading">Finished video</h2>
             </div>
             <span id="video-job-badge" class="mini-badge">idle</span>
@@ -586,12 +596,12 @@
           <video id="video-player" controls preload="metadata" hidden>
             Your browser does not support video playback.
           </video>
-          <a id="video-download" class="download-link" href="#" download hidden>Open or save the MKV master</a>
+          <a id="video-download" class="download-link" href="#" download hidden>Open or save the video output</a>
           <div class="pipeline-monitor" aria-label="Latest video pipeline status">
             <div class="pipeline-row"><span>Current stage</span><strong id="pipeline-stage">Waiting for a video job</strong></div>
             <progress id="pipeline-progress" max="100" value="0"></progress>
           </div>
-          <p class="player-note">The master keeps the source video stream unchanged and stores the converted audio as lossless FLAC. Browser playback depends on the original video codec; the file remains playable in VLC.</p>
+          <p class="player-note">The output keeps the source video stream unchanged. MKV uses lossless FLAC audio; MP4 uses AAC audio for broader compatibility. Browser playback still depends on the original video codec.</p>
         </section>
         <section class="card player-card system-board" aria-labelledby="system-heading">
           <div class="player-heading">
@@ -633,7 +643,7 @@
     </div>
     <footer class="privacy-strip">
       <span><strong>Local inference only</strong> - no cloud API and no per-minute credits</span>
-      <span>MKV masters are validated before they are served</span>
+      <span>Video masters are validated before they are served</span>
     </footer>
   </main>
 
@@ -685,6 +695,7 @@
     const youtubeCacheSummary = document.querySelector('#youtube-cache-summary');
     const youtubeCacheClearButton = document.querySelector('#youtube-cache-clear');
     const youtubeUrl = document.querySelector('#youtube-url');
+    const youtubeOutputFormat = document.querySelector('#youtube-output-format');
     const youtubeAuthorized = document.querySelector('#youtube-authorized');
     const youtubeConvertButton = document.querySelector('#youtube-convert');
     const youtubeProgress = document.querySelector('#youtube-progress');
@@ -696,6 +707,7 @@
     const localVideoInput = document.querySelector('#local-video-input');
     const chooseLocalVideoButton = document.querySelector('#choose-local-video');
     const localVideoName = document.querySelector('#local-video-name');
+    const localVideoOutputFormat = document.querySelector('#local-video-output-format');
     const localVideoUploadProgress = document.querySelector('#local-video-upload-progress');
     const localVideoUploadStatus = document.querySelector('#local-video-upload-status');
     const localVideoAuthorized = document.querySelector('#local-video-authorized');
@@ -739,6 +751,7 @@
     const requiredBackendFeatures = [
       'youtube-source-cache-v1',
       'local-video-upload-v1',
+      'video-output-formats-v1',
       'clean-ui-labels-v1',
       'production-console-ui-v1'
     ];
@@ -1072,7 +1085,7 @@
         converting_chunks: 'Converting speech chunks on CUDA',
         reconstructing_audio: 'Crossfading and reconstructing exact timing',
         post_processing_audio: 'Applying pitch and tone adjustments',
-        remuxing_video: 'Remuxing copied video with lossless audio',
+        remuxing_video: 'Remuxing copied video with selected audio format',
         validating_output: 'Fully decoding and validating the finished video',
         completed: 'Completed',
         failed: 'Failed'
@@ -1086,7 +1099,9 @@
       videoPlayer.hidden = false;
       videoPlayer.load();
       videoDownload.href = mediaUrl;
-      videoDownload.download = `voicebox-sts-${job.job_id}.mkv`;
+      const outputFormat = String(job.output_format || 'mkv').toLowerCase();
+      videoDownload.download = `voicebox-sts-${job.job_id}.${outputFormat}`;
+      videoDownload.textContent = `Open or save the ${outputFormat.toUpperCase()} output`;
       videoDownload.hidden = false;
       videoPlayerLabel.textContent = job.video?.title || `Completed job ${job.job_id}`;
       videoJobBadge.textContent = 'completed';
@@ -1510,6 +1525,7 @@
             sample_id: sample.value,
             tau: 0.3,
             ...adjustments,
+            output_format: youtubeOutputFormat.value,
             authorized: youtubeAuthorized.checked
           })
         });
@@ -1547,6 +1563,7 @@
             sample_id: sample.value,
             tau: 0.3,
             ...adjustments,
+            output_format: localVideoOutputFormat.value,
             authorized: localVideoAuthorized.checked
           })
         });

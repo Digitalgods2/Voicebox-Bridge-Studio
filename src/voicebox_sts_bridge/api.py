@@ -1,10 +1,12 @@
 from __future__ import annotations
 
+import gc
 import mimetypes
 from contextlib import asynccontextmanager
+from datetime import timedelta
 from pathlib import Path
 import threading
-from typing import Any
+from typing import Any, Literal
 from uuid import UUID
 
 from fastapi import BackgroundTasks, FastAPI, HTTPException, Query, Request, Response
@@ -19,6 +21,7 @@ from .logging_setup import tail_log
 from .media_store import MediaStore
 from .openvoice_engine import OpenVoiceEngine, OpenVoiceError
 from .settings import Settings
+from .storage_cleanup import StorageCleanup
 from .voicebox_client import VoiceBoxClient, VoiceBoxError
 from .youtube_service import YouTubeJobError, YouTubeJobService
 
@@ -49,6 +52,7 @@ class YouTubeJobRequest(BaseModel):
         default=0.0, ge=-MAX_PITCH_SEMITONES, le=MAX_PITCH_SEMITONES
     )
     brightness_db: float = Field(default=0.0, ge=-MAX_BRIGHTNESS_DB, le=MAX_BRIGHTNESS_DB)
+    output_format: Literal["mkv", "mp4"] = "mkv"
     authorized: bool = False
 
 
@@ -68,15 +72,31 @@ class LocalVideoJobRequest(BaseModel):
         default=0.0, ge=-MAX_PITCH_SEMITONES, le=MAX_PITCH_SEMITONES
     )
     brightness_db: float = Field(default=0.0, ge=-MAX_BRIGHTNESS_DB, le=MAX_BRIGHTNESS_DB)
+    output_format: Literal["mkv", "mp4"] = "mkv"
     authorized: bool = False
 
 
 def create_app(settings: Settings | None = None) -> FastAPI:
     settings = settings or Settings.from_env()
+    storage_cleanup = StorageCleanup(
+        settings.data_dir,
+        completed_job_retention=timedelta(days=settings.video_job_retention_days),
+        failed_job_retention=timedelta(hours=settings.failed_video_job_retention_hours),
+        orphan_video_input_retention=timedelta(hours=settings.orphan_video_input_retention_hours),
+    )
+
     @asynccontextmanager
     async def lifespan(app: FastAPI):
+        # Disk cleanup is manifest-driven and confined to data/video_jobs and
+        # data/video_inputs. Python collection also releases any objects made
+        # while importing the app before the server starts accepting work.
+        gc.collect()
         audio_jobs.recover_interrupted()
+        cleanup_result = storage_cleanup.run_startup_cleanup()
+        app.state.startup_cleanup = cleanup_result
+        gc.collect()
         yield
+        gc.collect()
 
     app = FastAPI(title="VoiceBox STS Bridge", version=__version__, lifespan=lifespan)
     client = VoiceBoxClient(
@@ -131,6 +151,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
                 "resilient-video-polling-v1",
                 "youtube-source-cache-v1",
                 "local-video-upload-v1",
+                "video-output-formats-v1",
                 "clean-ui-labels-v1",
                 "production-console-ui-v1",
                 "secure-openvoice-runtime-v1",
@@ -401,6 +422,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
                 tau=request.tau,
                 pitch_semitones=request.pitch_semitones,
                 brightness_db=request.brightness_db,
+                output_format=request.output_format,
                 authorized=request.authorized,
             )
         except ValueError as exc:
@@ -437,6 +459,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
                 tau=request.tau,
                 pitch_semitones=request.pitch_semitones,
                 brightness_db=request.brightness_db,
+                output_format=request.output_format,
                 authorized=request.authorized,
             )
         except (ValueError, FileNotFoundError, KeyError) as exc:

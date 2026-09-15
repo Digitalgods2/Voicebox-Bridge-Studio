@@ -70,6 +70,11 @@ Repeat with different voices using the same input ID. The existing synchronous
 (`/api/video-inputs`, `/api/video/jobs`) and YouTube jobs (`/api/youtube/jobs`)
 are also described in `/docs`.
 
+Video jobs accept `output_format` as `mkv` (the default, with lossless FLAC
+audio) or `mp4` (with AAC audio for broader compatibility). In both formats
+the source video stream is copied without re-encoding. MKV carries source
+subtitle streams when available; MP4 output omits them.
+
 ## Execution and storage
 
 Inference stays local and uses the existing shared conversion lock. Run one
@@ -79,7 +84,13 @@ outputs survive restart; queued/running audio API jobs become failed with an
 idempotent: retrying a POST creates another job. There is no cancellation or
 automatic retry. Job history covers the new audio API, not older UI conversions.
 
-Keep the unauthenticated API on loopback. Files and manifests are retained under
-the configured data directory; this API does not automatically delete them.
-Benchmark short speech before large inputs; the audio endpoint uses the existing
-single-file engine path, while the video workflow provides chunked conversion.
+Keep the unauthenticated API on loopback. At startup, the bridge performs
+manifest-driven cleanup of video-job intermediates and stale terminal jobs under
+the configured data directory. Completed video jobs are retained for 30 days by
+default; failed jobs are retained for 24 hours for diagnostics. Override these
+periods with the `BRIDGE_VIDEO_JOB_RETENTION_DAYS`,
+`BRIDGE_FAILED_VIDEO_JOB_RETENTION_HOURS`, and
+`BRIDGE_ORPHAN_VIDEO_INPUT_RETENTION_HOURS` environment variables. Invalid
+manifests are preserved. Benchmark short speech before large inputs; the audio
+endpoint uses the existing single-file engine path, while the video workflow
+provides chunked conversion.

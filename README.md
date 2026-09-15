@@ -40,7 +40,7 @@ Implemented:
 - exact reconstructed PCM frame-count enforcement;
 - profile-aware pitch correction and brightness/tone-depth controls;
 - high-quality, formant-preserving pitch DSP with exact frame-count enforcement;
-- unchanged video-stream remuxing with lossless FLAC audio in Matroska;
+- unchanged video-stream remuxing with selectable MKV (lossless FLAC) or MP4 (AAC) output;
 - complete FFmpeg decode validation before a video job is marked complete;
 - responsive desktop/mobile web UI and a one-click Windows launcher.
 - vivid, stage-specific visual language with real-time VoiceBox, OpenVoice, media-tool, cache, and job-state indicators;
@@ -90,7 +90,7 @@ flowchart LR
     STITCH --> DSP[Pitch + tone DSP\nexact frame count]
     DSP --> MUX[FFmpeg stream-copy remux]
     MEDIA --> MUX
-    MUX --> OUT[Validated WAV or MKV output]
+    MUX --> OUT[Validated WAV, MKV, or MP4 output]
 ```
 
 | Component | Responsibility |
@@ -111,7 +111,7 @@ flowchart LR
 
 - The original video stream is copied with FFmpeg's `-c:v copy`; it is not re-encoded.
 - Extracted, chunked, and reconstructed audio remains uncompressed 16-bit PCM.
-- The final master uses lossless FLAC audio inside an MKV container.
+- Video outputs keep the source video stream unchanged. MKV contains lossless FLAC audio; MP4 contains AAC audio for broader compatibility.
 - OpenVoice runs in FP32. The bridge does not use half-precision inference as a speed shortcut.
 - Long-form chunk boundaries are multiples of OpenVoice's 256-sample frame size.
 - Each chunk includes approximately one second of context on either side.
@@ -496,6 +496,22 @@ Start with small changes and audition the result. A range of roughly 0.5 to 2 se
 
 Uploads are streamed to UUID-named files under `data/inputs/`. The default upload safety limit is 1 GiB.
 
+### Supported input and output formats
+
+The app accepts these local input types:
+
+- **Audio input:** WAV, MP3, FLAC, M4A, AAC, OGG, OPUS, and WMA.
+- **Video input:** AVI, M2TS, M4V, MKV, MOV, MP4, MPEG, MPG, TS, WebM, and WMV. Video files must contain both a video stream and an audio stream.
+- **YouTube input:** an authorized direct HTTPS YouTube video URL. Playlists, search pages, credentials, custom ports, and unsupported/private access flows are rejected.
+- **VoiceBox reference input:** WAV samples retrieved from the local VoiceBox API.
+
+The app produces these output types:
+
+- **Audio output:** validated WAV.
+- **Video output:** MKV or MP4, selected per YouTube or imported-video job. MKV is the default and uses lossless FLAC audio; MP4 keeps the source video stream unchanged but uses AAC audio for broader player compatibility. Source subtitles are carried into MKV when available; MP4 output does not carry source subtitle streams.
+
+The conversion engine must be able to decode the contents of the selected input file. Browser preview support can be narrower than FFmpeg support.
+
 ### Convert a YouTube video
 
 1. Select the target VoiceBox profile.
@@ -505,11 +521,11 @@ Uploads are streamed to UUID-named files under `data/inputs/`. The default uploa
 5. Click **Download, cache, and convert video**. If the entered video ID matches the active cache, the button changes to **Convert using cached video** and yt-dlp is skipped.
 6. Leave the bridge console running. The page displays cache lookup, download or reuse, extraction, conversion, reconstruction, post-processing, remux, and validation stages.
 7. A page refresh reconnects to the latest job stored in browser local storage.
-8. When complete, use the right-hand video player or save the MKV master.
+8. When complete, use the right-hand video player or save the selected MKV or MP4 output.
 
 The URL validator rejects arbitrary hosts, HTTP URLs, credentials, custom ports, playlists without a direct video, channels, and search pages. yt-dlp is configured for one item and ignores user-level yt-dlp configuration files.
 
-The cache is keyed by the canonical YouTube video ID, so equivalent Watch, Shorts, Embed, Live-recording, and `youtu.be` links reuse the same source. The cache panel shows its title, size, and reuse count. **Clear cache** removes only the cached source; completed MKV outputs and durable job records are preserved. Rights confirmation remains mandatory on cache hits.
+The cache is keyed by the canonical YouTube video ID, so equivalent Watch, Shorts, Embed, Live-recording, and `youtu.be` links reuse the same source. The cache panel shows its title, size, and reuse count. **Clear cache** removes only the cached source; completed MKV/MP4 outputs and durable job records are preserved. Rights confirmation remains mandatory on cache hits.
 
 ### Convert a video from this PC
 
@@ -519,7 +535,7 @@ The cache is keyed by the canonical YouTube video ID, so equivalent Watch, Short
 4. Confirm that you own the video or have permission to process it.
 5. Click **Convert imported video** and leave the bridge console running.
 6. Follow extraction, chunk conversion, exact-timing reconstruction, optional pitch/tone processing, lossless remux, and full validation progress.
-7. When complete, play or save the same MKV master used by the YouTube workflow.
+7. When complete, play or save the selected MKV or MP4 output used by the YouTube workflow.
 
 Imported videos are streamed to UUID-named files under `data/video_inputs/`; the browser never sends an arbitrary filesystem path to the conversion API. The default video upload safety limit is 12 GiB. Imported sources do not affect the single-video YouTube download cache.
 
@@ -535,7 +551,7 @@ Each video job passes through these durable stages. YouTube jobs use the downloa
 6. **Converting chunks** — one isolated worker loads the OpenVoice model and target embedding once, then converts every chunk sequentially on the GPU.
 7. **Reconstructing** — overlapping converted regions are linearly crossfaded and cropped to the exact source frame count.
 8. **Applying pitch and tone** — optional adjustments run once on the complete reconstructed track; output is forced back to the exact source frame count.
-9. **Remuxing** — FFmpeg copies the original video stream and adds lossless FLAC audio in MKV.
+9. **Remuxing** — FFmpeg copies the original video stream and writes either lossless FLAC audio in MKV or AAC audio in MP4.
 10. **Validating** — FFprobe verifies codecs and duration; FFmpeg decodes both streams with error-on-failure behavior.
 11. **Completed** — the final media route becomes available only after every check passes.
 
@@ -591,7 +607,7 @@ Interactive OpenAPI documentation is available at <http://127.0.0.1:8765/docs> w
 | `GET` | `/api/media/video-inputs/{video_input_id}` | Stream an imported video with byte-range support |
 | `GET` | `/api/media/outputs/{job_id}` | Stream a converted WAV |
 | `GET` | `/api/media/references/{profile_id}/{sample_id}` | Stream a cached VoiceBox reference |
-| `GET` | `/api/media/video-jobs/{job_id}` | Stream or save a completed MKV master |
+| `GET` | `/api/media/video-jobs/{job_id}` | Stream or save a completed MKV or MP4 output |
 
 ### Example video-job request
 
@@ -603,11 +619,12 @@ Interactive OpenAPI documentation is available at <http://127.0.0.1:8765/docs> w
   "tau": 0.3,
   "pitch_semitones": -1.5,
   "brightness_db": -2.0,
+  "output_format": "mp4",
   "authorized": true
 }
 ```
 
-An imported-video job uses the same fields but replaces `youtube_url` with the `video_input_id` returned by `/api/video-inputs`. Both adjustment fields default to `0.0` and accept values from `-6.0` through `+6.0`. Local `/api/conversions` requests accept the same fields. Completed local and video manifests record the requested values, whether DSP ran, the filter configuration, and the verified output audio geometry.
+An imported-video job uses the same fields but replaces `youtube_url` with the `video_input_id` returned by `/api/video-inputs`. `output_format` accepts `mkv` (default, lossless FLAC audio) or `mp4` (AAC audio). Both adjustment fields default to `0.0` and accept values from `-6.0` through `+6.0`. Local `/api/conversions` requests accept the same fields. Completed local and video manifests record the requested values, whether DSP ran, the filter configuration, and the verified output audio geometry.
 
 ## Configuration
 
@@ -618,6 +635,9 @@ An imported-video job uses the same fields but replaces `youtube_url` with the `
 | `BRIDGE_PORT` | `8765` | Sidecar HTTP port |
 | `BRIDGE_DATA_DIR` | `data` | Root for models, caches, inputs, manifests, and outputs |
 | `BRIDGE_ENGINE_DEVICE` | `cuda:0` | OpenVoice inference device: `cpu`, `cuda`, or `cuda:<index>` |
+| `BRIDGE_VIDEO_JOB_RETENTION_DAYS` | `30` | Days to retain completed video-job folders and final MKV/MP4 masters |
+| `BRIDGE_FAILED_VIDEO_JOB_RETENTION_HOURS` | `24` | Hours to retain failed video-job folders for diagnostics |
+| `BRIDGE_ORPHAN_VIDEO_INPUT_RETENTION_HOURS` | `24` | Grace period before deleting an uploaded video no retained job references |
 
 Non-loopback VoiceBox URLs and bridge hosts are rejected by configuration validation.
 
@@ -645,10 +665,10 @@ data/
     ├── audio/                       # Extracted and reconstructed PCM WAVs
     ├── chunks/source/               # Context-overlapped inference inputs
     ├── chunks/converted/            # Converted chunks
-    └── output.mkv                   # Copied video + lossless FLAC master
+    └── output.{mkv|mp4}             # Copied video + selected audio master
 ```
 
-Audio/chunk intermediates are intentionally retained for debugging, quality review, and future recovery work. YouTube jobs reference the reusable cache rather than retaining a private duplicate of the downloaded source; imported-video jobs reference their file under `video_inputs/`. Legacy job directories created before version 0.3 may still contain `download/` folders. Long videos and imported originals can require substantial disk space.
+At bridge startup, manifest-driven garbage collection marks queued/running video jobs from a prior process as interrupted, removes failed jobs after their diagnostic grace period, prunes audio/chunk/download intermediates from retained completed jobs, and removes completed jobs older than `BRIDGE_VIDEO_JOB_RETENTION_DAYS`. Uploaded local videos are retained while referenced by a retained job; unreferenced uploads are removed after their grace period. Invalid manifests are preserved for manual inspection. The single active YouTube source cache is managed separately and is not removed by this cleanup.
 
 ## Repository layout
 
@@ -828,9 +848,9 @@ A failed replacement download leaves the previous valid cache in place. At stead
 - Browser preview support is narrower than FFmpeg support. A source can be valid for conversion even if the right-hand source player cannot decode its original codec.
 - Inspect `data/video_jobs/JOB_ID/manifest.json` for the exact failed stage and diagnostic. Imported source files remain under `data/video_inputs/` for retrying.
 
-### The completed MKV does not play in the browser
+### The completed video does not play in the browser
 
-The sidecar copies the best downloaded video codec without re-encoding. Browser Matroska/codec support varies. Use the **Open or save the MKV master** link and play it in VLC. The file is still fully decoded by FFmpeg before completion is reported.
+The sidecar copies the best downloaded video codec without re-encoding. Browser container/codec support varies. Use the **Open or save the MKV or MP4 output** link and play it in VLC. The file is still fully decoded by FFmpeg before completion is reported.
 
 ### A long job stops when the app closes
 

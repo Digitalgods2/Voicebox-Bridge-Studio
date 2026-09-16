@@ -182,6 +182,13 @@ def main() -> int:
     from voicebox_sts_bridge.openvoice_engine import OpenVoiceEngine
     from voicebox_sts_bridge.settings import Settings
 
+    # Settings defaults are relative to the current working directory. A
+    # double-clicked executable can be launched with either the project root
+    # or dist/ as its working directory, so anchor the default data directory
+    # to the same project root used to find .envs/ and the model files.
+    project_root = OpenVoiceEngine().project_root
+    os.environ.setdefault("BRIDGE_PROJECT_ROOT", str(project_root))
+    os.environ.setdefault("BRIDGE_DATA_DIR", str(project_root / "data"))
     settings = Settings.from_env()
     log_path = configure_logging(settings.data_dir, console=False)
 
@@ -201,8 +208,7 @@ def main() -> int:
 
     sys.excepthook = _excepthook
 
-    project_root = str(OpenVoiceEngine().project_root)
-    state = _instance_state(project_root)
+    state = _instance_state(str(project_root))
 
     if state == 0:
         webbrowser.open(BRIDGE_URL)

@@ -51,6 +51,7 @@ class StorageCleanupTests(unittest.TestCase):
             root = Path(directory)
             referenced_id = str(uuid4())
             orphan_id = str(uuid4())
+            latest_id = str(uuid4())
             recent = write_job(
                 root,
                 status="completed",
@@ -69,7 +70,8 @@ class StorageCleanupTests(unittest.TestCase):
             failed = write_job(root, status="failed", updated=NOW - timedelta(days=2))
             interrupted = write_job(root, status="running", updated=NOW - timedelta(minutes=5))
             write_video_input(root, referenced_id, NOW - timedelta(days=2))
-            write_video_input(root, orphan_id, NOW - timedelta(days=2))
+            write_video_input(root, orphan_id, NOW - timedelta(days=3))
+            write_video_input(root, latest_id, NOW - timedelta(hours=2))
 
             result = StorageCleanup(root).run_startup_cleanup(now=NOW)
 
@@ -84,6 +86,23 @@ class StorageCleanupTests(unittest.TestCase):
             self.assertFalse((recent / "chunks").exists())
             self.assertTrue((root / "video_inputs" / f"{referenced_id}.mp4").is_file())
             self.assertFalse((root / "video_inputs" / f"{orphan_id}.mp4").exists())
+            self.assertTrue((root / "video_inputs" / f"{latest_id}.mp4").is_file())
+
+    def test_latest_unreferenced_video_input_is_preserved_indefinitely(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            older_id = str(uuid4())
+            latest_id = str(uuid4())
+            write_video_input(root, older_id, NOW - timedelta(days=90))
+            write_video_input(root, latest_id, NOW - timedelta(days=31))
+
+            result = StorageCleanup(root).collect(now=NOW)
+
+            self.assertEqual(result["removed_orphan_video_inputs"], 2)
+            self.assertFalse((root / "video_inputs" / f"{older_id}.mp4").exists())
+            self.assertFalse((root / "video_inputs" / f"{older_id}.json").exists())
+            self.assertTrue((root / "video_inputs" / f"{latest_id}.mp4").is_file())
+            self.assertTrue((root / "video_inputs" / f"{latest_id}.json").is_file())
 
     def test_invalid_job_manifest_is_preserved(self) -> None:
         with tempfile.TemporaryDirectory() as directory:

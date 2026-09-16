@@ -37,3 +37,11 @@ def test_windows_launcher_reports_an_insecure_engine_runtime() -> None:
     assert "engine-status" in launcher
     assert "OpenVoice engine is missing, incompatible, or insecure" in launcher
     assert "Reinstall the pinned isolated runtime from README.md" in launcher
+
+
+def test_frozen_launcher_anchors_default_data_to_project_root() -> None:
+    launcher = (PROJECT_ROOT / "build_assets" / "launcher.py").read_text(encoding="utf-8")
+
+    assert 'project_root = OpenVoiceEngine().project_root' in launcher
+    assert 'os.environ.setdefault("BRIDGE_DATA_DIR", str(project_root / "data"))' in launcher
+    assert 'settings = Settings.from_env()' in launcher

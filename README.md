@@ -316,7 +316,7 @@ Steps 1–6 above must already be done (dependencies installed, the OpenVoice en
 .\build_assets\build.bat
 ```
 
-This regenerates the icon (`build_assets\icon.ico`), builds a windowed, single-file executable with PyInstaller, and copies it to `VoiceBoxBridge.exe` in the repository root. It must stay there, next to `.envs\` and `start-bridge.bat`, because it locates the isolated OpenVoice environment relative to its own folder (it also tolerates being run once out of `dist\`, but not moved somewhere unrelated).
+This regenerates the icon (`build_assets\icon.ico`), builds a windowed, single-file executable with PyInstaller, and copies it to `VoiceBoxBridge.exe` in the repository root. It should stay there, next to `.envs\` and `start-bridge.bat`, because it locates the isolated OpenVoice environment and default `data\` directory relative to the project root. A build launched directly from `dist\` is tolerated and still uses the project-root data directory, but the executable should not be moved somewhere unrelated.
 
 The result:
 
@@ -631,7 +631,7 @@ An imported-video job uses the same fields but replaces `youtube_url` with the `
 | `BRIDGE_ENGINE_DEVICE` | `cuda:0` | OpenVoice inference device: `cpu`, `cuda`, or `cuda:<index>` |
 | `BRIDGE_VIDEO_JOB_RETENTION_DAYS` | `30` | Days to retain completed video-job folders and final MKV/MP4 masters |
 | `BRIDGE_FAILED_VIDEO_JOB_RETENTION_HOURS` | `24` | Hours to retain failed video-job folders for diagnostics |
-| `BRIDGE_ORPHAN_VIDEO_INPUT_RETENTION_HOURS` | `24` | Grace period before deleting an uploaded video no retained job references |
+| `BRIDGE_ORPHAN_VIDEO_INPUT_RETENTION_HOURS` | `24` | Grace period before deleting an older uploaded video no retained job references; the latest uploaded local video is always preserved until another is uploaded |
 
 Non-loopback VoiceBox URLs and bridge hosts are rejected by configuration validation.
 
@@ -662,7 +662,7 @@ data/
     └── output.{mkv|mp4}             # Copied video + selected audio master
 ```
 
-At bridge startup, manifest-driven garbage collection marks queued/running video jobs from a prior process as interrupted, removes failed jobs after their diagnostic grace period, prunes audio/chunk/download intermediates from retained completed jobs, and removes completed jobs older than `BRIDGE_VIDEO_JOB_RETENTION_DAYS`. Uploaded local videos are retained while referenced by a retained job; unreferenced uploads are removed after their grace period. Invalid manifests are preserved for manual inspection. The single active YouTube source cache is managed separately and is not removed by this cleanup.
+At bridge startup, manifest-driven garbage collection marks queued/running video jobs from a prior process as interrupted, removes failed jobs after their diagnostic grace period, prunes audio/chunk/download intermediates from retained completed jobs, and removes completed jobs older than `BRIDGE_VIDEO_JOB_RETENTION_DAYS`. Uploaded local videos are retained while referenced by a retained job. The latest uploaded local video is also preserved as the active working source until another local video is uploaded; older unreferenced uploads are removed after their grace period. Invalid manifests are preserved for manual inspection. The single active YouTube source cache is managed separately and remains available until it is cleared or replaced.
 
 ## Repository layout
 

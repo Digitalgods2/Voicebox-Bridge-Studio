@@ -57,8 +57,10 @@ class StorageCleanup:
     """Safely collect disposable local video data at bridge startup.
 
     Final outputs are retained for a bounded period, while the large files
-    used to produce them are disposable once a job has completed. Failed jobs
-    are retained briefly for diagnostics and then removed as a unit.
+    used to produce them are disposable once a job has completed. The newest
+    uploaded local video remains available as the user's active working source;
+    older unreferenced uploads are collected after their grace period. Failed
+    jobs are retained briefly for diagnostics and then removed as a unit.
     """
 
     def __init__(
@@ -165,9 +167,11 @@ class StorageCleanup:
                 except (ValueError, TypeError, AttributeError):
                     invalid_manifests += 1
 
+        latest_video_input_id = self._latest_video_input_id()
         removed_video_inputs = self._collect_orphan_video_inputs(
             referenced_video_inputs,
             cutoff=current - self.orphan_video_input_retention,
+            protected_video_input_id=latest_video_input_id,
         )
         return {
             "removed_video_jobs": removed_jobs,
@@ -226,7 +230,32 @@ class StorageCleanup:
                 LOGGER.warning("Could not prune video job intermediate %s: %s", path, exc)
         return removed
 
-    def _collect_orphan_video_inputs(self, referenced: set[str], *, cutoff: datetime) -> int:
+    def _latest_video_input_id(self) -> str | None:
+        if not self.video_inputs_dir.is_dir() or self.video_inputs_dir.is_symlink():
+            return None
+        latest: tuple[datetime, str] | None = None
+        for path in self.video_inputs_dir.iterdir():
+            if path.suffix.lower() == ".json" or not path.is_file():
+                continue
+            try:
+                video_input_id = str(UUID(path.stem))
+            except (ValueError, AttributeError):
+                continue
+            try:
+                modified = datetime.fromtimestamp(path.stat().st_mtime, timezone.utc)
+            except OSError:
+                continue
+            if latest is None or modified > latest[0]:
+                latest = (modified, video_input_id)
+        return latest[1] if latest is not None else None
+
+    def _collect_orphan_video_inputs(
+        self,
+        referenced: set[str],
+        *,
+        cutoff: datetime,
+        protected_video_input_id: str | None = None,
+    ) -> int:
         if not self.video_inputs_dir.is_dir() or self.video_inputs_dir.is_symlink():
             return 0
         grouped: dict[str, list[Path]] = {}
@@ -244,7 +273,7 @@ class StorageCleanup:
 
         removed = 0
         for video_input_id, paths in grouped.items():
-            if video_input_id in referenced:
+            if video_input_id in referenced or video_input_id == protected_video_input_id:
                 continue
             timestamps = []
             for path in paths:

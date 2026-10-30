@@ -3,7 +3,6 @@
 import asyncio
 import os
 import signal
-from pathlib import Path
 
 import torch
 from fastapi import APIRouter, Depends
@@ -17,19 +16,16 @@ from ..utils.platform_detect import get_backend_type, is_amd_rocm_capable
 
 router = APIRouter()
 
-# Frontend build directory — present in Docker, absent in dev/API-only mode
-_frontend_dir = Path(__file__).resolve().parent.parent.parent / "frontend"
-
 
 @router.get("/")
 async def root():
-    """Root endpoint — serves SPA index.html in Docker, JSON otherwise."""
+    """Root endpoint — serves the built SPA's index.html when present, JSON otherwise."""
     from .. import __version__
 
-    index = _frontend_dir / "index.html"
-    if index.is_file():
-        return FileResponse(index, media_type="text/html")
-    return {"message": "voicebox API", "version": __version__}
+    frontend_dir = config.get_frontend_dir()
+    if frontend_dir is not None:
+        return FileResponse(frontend_dir / "index.html", media_type="text/html")
+    return {"message": "VoiceBridge Studio API", "version": __version__}
 
 
 @router.post("/shutdown")

@@ -105,6 +105,19 @@ def resolve_storage_path(path: str | Path | None) -> Path | None:
     return (_data_dir / stored_path).resolve()
 
 
+def get_frontend_dir() -> Path | None:
+    """Directory of the built web UI, or None in dev/API-only mode.
+
+    Docker copies the Vite build to ``frontend/``; a local ``bun run build:web``
+    (used by the launcher) leaves it in ``web/dist/``.
+    """
+    project_root = Path(__file__).resolve().parent.parent
+    for candidate in (project_root / "frontend", project_root / "web" / "dist"):
+        if (candidate / "index.html").is_file():
+            return candidate
+    return None
+
+
 def get_db_path() -> Path:
     """Get database file path."""
     return _data_dir / "voicebox.db"

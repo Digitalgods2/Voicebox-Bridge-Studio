@@ -195,12 +195,7 @@ def _mount_frontend(application: FastAPI) -> None:
     assets and add a catch-all route so the React SPA handles client-side
     routing.  In dev or API-only mode neither exists and this is a no-op.
     """
-    project_root = Path(__file__).resolve().parent.parent
-    # Docker copies the build to frontend/; a local `bun run build:web` leaves it in web/dist/.
-    frontend_dir = next(
-        (path for path in (project_root / "frontend", project_root / "web" / "dist") if path.is_dir()),
-        None,
-    )
+    frontend_dir = config.get_frontend_dir()
     if frontend_dir is None:
         return
 

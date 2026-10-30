@@ -108,8 +108,8 @@ All commands run in PowerShell from the project folder.
 1. **Get the code**
 
    ```powershell
-   git clone https://github.com/Digitalgods2/Voicebox-STS-Sidecar.git
-   cd Voicebox-STS-Sidecar
+   git clone https://github.com/Digitalgods2/Voicebox-Bridge-Studio.git
+   cd Voicebox-Bridge-Studio
    ```
 
 2. **Backend environment**: PyTorch with CUDA and the TTS engine packages,

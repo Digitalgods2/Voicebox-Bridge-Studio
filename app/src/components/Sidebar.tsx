@@ -57,18 +57,23 @@ export function Sidebar({ isMacOS }: SidebarProps) {
   return (
     <div
       className={cn(
-        'fixed left-0 top-0 h-full w-20 bg-sidebar border-r border-border flex flex-col items-center py-6 gap-6',
-        isMacOS && 'pt-14',
+        'fixed left-0 top-0 h-full w-[var(--sidebar-width)] bg-sidebar border-r border-border flex flex-col items-center py-5 gap-5',
+        isMacOS && 'pt-12',
       )}
     >
       {/* Logo */}
-      <div className="mb-2">
+      <Link to="/settings/about" className="flex flex-col items-center gap-1.5 px-2 shrink-0">
         <img
           src={appLogo}
-          alt="VoiceBridge Studio"
-          className="sidebar-logo w-12 h-12 object-contain"
+          alt="VoiceBox Bridge Studio"
+          className="sidebar-logo w-28 h-28 object-contain"
         />
-      </div>
+        <span className="text-center text-[11px] font-semibold leading-tight tracking-wide text-accent">
+          VoiceBox Bridge
+          <br />
+          Studio
+        </span>
+      </Link>
 
       {/* Navigation Buttons */}
       <div className="flex flex-col gap-3">

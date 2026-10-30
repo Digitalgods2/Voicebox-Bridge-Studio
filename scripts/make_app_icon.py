@@ -1,4 +1,4 @@
-"""Generate every VoiceBridge Studio logo and icon from branding/logo-source.png.
+"""Generate every VoiceBox Bridge Studio logo and icon from branding/logo-source.png.
 
 The source artwork sits on a plain white background. Only the white that is
 connected to the image border is removed, so enclosed whites (the filmstrip's
@@ -102,7 +102,7 @@ def square(image: Image.Image) -> Image.Image:
 
 def main() -> None:
     logo = square(cut_out(Image.open(SOURCE)))
-    outputs = [(OUT_ICON_SOURCE, 1024), (OUT_APP_LOGO, 256)] + [(path, 64) for path in OUT_FAVICONS]
+    outputs = [(OUT_ICON_SOURCE, 1024), (OUT_APP_LOGO, 512)] + [(path, 64) for path in OUT_FAVICONS]
     for path, size in outputs:
         path.parent.mkdir(parents=True, exist_ok=True)
         logo.resize((size, size), Image.Resampling.LANCZOS).save(path, optimize=True)

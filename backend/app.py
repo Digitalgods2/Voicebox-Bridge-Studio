@@ -148,7 +148,7 @@ def create_app() -> FastAPI:
     lifespan = compose_lifespan(voicebox_lifespan, mcp_app.router.lifespan_context)
 
     application = FastAPI(
-        title="VoiceBridge Studio API",
+        title="VoiceBox Bridge Studio API",
         description="Local text-to-speech, voice cloning, and speech-to-speech API",
         version=__version__,
         lifespan=lifespan,
@@ -266,7 +266,7 @@ async def _run_startup(application: FastAPI) -> None:
     import platform
     import sys
 
-    logger.info("VoiceBridge Studio v%s starting up", __version__)
+    logger.info("VoiceBox Bridge Studio v%s starting up", __version__)
     logger.info(
         "Python %s on %s %s (%s)",
         sys.version.split()[0],
@@ -368,7 +368,7 @@ async def _run_startup(application: FastAPI) -> None:
 
 async def _run_shutdown() -> None:
     """Unload models on lifespan exit."""
-    logger.info("VoiceBridge Studio server shutting down...")
+    logger.info("VoiceBox Bridge Studio server shutting down...")
     try:
         tts.unload_tts_model()
     except Exception:

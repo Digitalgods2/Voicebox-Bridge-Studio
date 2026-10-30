@@ -1,9 +1,9 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "VoiceBridge Studio",
-  "mainBinaryName": "voicebridge-studio",
+  "productName": "VoiceBox Bridge Studio",
+  "mainBinaryName": "voicebox-bridge-studio",
   "version": "0.6.0",
-  "identifier": "com.digitalgods.voicebridge",
+  "identifier": "com.digitalgods.voiceboxbridge",
   "build": {
     "beforeDevCommand": "bun run dev",
     "beforeBuildCommand": "bun run build",

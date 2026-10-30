@@ -267,8 +267,8 @@ export function FloatingGenerateBox({
         'fixed',
         isStoriesRoute
           ? // Aligned with StoryContent: sidebar + list width + gap (tab bleeds with -mx-8)
-            'left-[calc(5rem+360px+1.5rem)] right-8'
-          : 'left-[calc(5rem+2rem)] right-8 lg:right-auto lg:w-[calc((100%-5rem-4rem)/2-1rem)]',
+            'left-[calc(var(--sidebar-width)+360px+1.5rem)] right-8'
+          : 'left-[calc(var(--sidebar-width)+2rem)] right-8 lg:right-auto lg:w-[calc((100%-var(--sidebar-width)-4rem)/2-1rem)]',
       )}
       style={{
         // On stories route: offset by track editor height when visible
@@ -427,13 +427,19 @@ export function FloatingGenerateBox({
                                         ? 'bg-accent text-accent-foreground border border-accent hover:bg-accent/90'
                                         : 'bg-card border border-border hover:bg-background/50',
                                     )}
-                                    aria-label={active ? t('generation.persona.ariaLabelActive') : t('generation.persona.ariaLabelInactive')}
+                                    aria-label={
+                                      active
+                                        ? t('generation.persona.ariaLabelActive')
+                                        : t('generation.persona.ariaLabelInactive')
+                                    }
                                     aria-pressed={active}
                                   >
                                     <Wand2 className="h-4 w-4" />
                                   </Button>
                                   <span className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-2 whitespace-nowrap rounded-md bg-popover px-3 py-1.5 text-xs text-popover-foreground border border-border opacity-0 transition-opacity group-hover:opacity-100 z-[9999]">
-                                    {active ? t('generation.persona.tooltipActive') : t('generation.persona.tooltipInactive')}
+                                    {active
+                                      ? t('generation.persona.tooltipActive')
+                                      : t('generation.persona.tooltipInactive')}
                                   </span>
                                 </div>
                               </FormControl>
@@ -578,7 +584,6 @@ export function FloatingGenerateBox({
                       </Select>
                     </div>
                   )}
-
 
                   <FormField
                     control={form.control}

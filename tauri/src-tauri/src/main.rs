@@ -977,11 +977,11 @@ fn stop_audio_playback(
 /// id on macOS, lowercased exe basename on Windows/Linux. Keep these in sync
 /// with `identifier` and `mainBinaryName` in tauri.conf.json.
 #[cfg(target_os = "macos")]
-const VOICEBOX_BUNDLE_ID: &str = "com.digitalgods.voicebridge";
+const VOICEBOX_BUNDLE_ID: &str = "com.digitalgods.voiceboxbridge";
 #[cfg(target_os = "windows")]
-const VOICEBOX_BUNDLE_ID: &str = "voicebridge-studio.exe";
+const VOICEBOX_BUNDLE_ID: &str = "voicebox-bridge-studio.exe";
 #[cfg(not(any(target_os = "macos", target_os = "windows")))]
-const VOICEBOX_BUNDLE_ID: &str = "voicebridge-studio";
+const VOICEBOX_BUNDLE_ID: &str = "voicebox-bridge-studio";
 
 /// Milliseconds to wait between activating the target app and firing the
 /// synthetic ⌘V, giving AppKit time to finish re-ordering windows and

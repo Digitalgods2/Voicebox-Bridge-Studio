@@ -261,12 +261,12 @@ function MainApp() {
         <div className="text-center space-y-6">
           <div className="flex justify-center relative">
             <div className="absolute inset-0 flex items-center justify-center">
-              <div className="w-48 h-48 rounded-full bg-accent/20 blur-3xl" />
+              <div className="w-72 h-72 rounded-full bg-accent/20 blur-3xl" />
             </div>
             <img
               src={appLogo}
-              alt="VoiceBridge Studio"
-              className="w-48 h-48 object-contain animate-fade-in-scale relative z-10"
+              alt="VoiceBox Bridge Studio"
+              className="w-72 h-72 object-contain animate-fade-in-scale relative z-10"
             />
           </div>
           {startupError ? (

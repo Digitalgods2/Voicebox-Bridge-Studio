@@ -1,4 +1,4 @@
-"""Windowed launcher for VoiceBridge Studio (the PyInstaller entry point).
+"""Windowed launcher for VoiceBox Bridge Studio (the PyInstaller entry point).
 
 A small exe with no ML code in it. It starts the merged backend (TTS, voice
 cloning, and speech-to-speech in one FastAPI server that also serves the web
@@ -24,7 +24,7 @@ import urllib.request
 import webbrowser
 from pathlib import Path
 
-APP_NAME = "VoiceBridge Studio"
+APP_NAME = "VoiceBox Bridge Studio"
 HOST = "127.0.0.1"
 PORT = int(os.environ.get("APP_PORT", "17493"))
 URL = f"http://{HOST}:{PORT}"
@@ -158,7 +158,7 @@ def tray_icon(root: Path, log_path: Path, on_quit):
         pystray.MenuItem("View Logs", view_logs),
         pystray.MenuItem("Quit", quit_app),
     )
-    return pystray.Icon("voicebridge-studio", image, APP_NAME, menu)
+    return pystray.Icon("voicebox-bridge-studio", image, APP_NAME, menu)
 
 
 def main() -> int:

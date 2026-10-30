@@ -1,10 +1,10 @@
-# VoiceBridge Studio
+# VoiceBox Bridge Studio
 
 A fully local voice studio for Windows: clone voices, generate speech, and
 convert existing recordings and videos into any of your voices, all on your own
 machine with no cloud inference, subscription, or per-minute cost.
 
-VoiceBridge Studio is built on [VoiceBox](https://github.com/jamiepine/voicebox)
+VoiceBox Bridge Studio is built on [VoiceBox](https://github.com/jamiepine/voicebox)
 by Jamie Pine and contributors (MIT). It keeps VoiceBox's text-to-speech,
 voice cloning, stories, captures, effects, and model management, and adds
 **speech-to-speech** as a built-in feature: the Voice Changer tab. See
@@ -103,7 +103,7 @@ downloaded by VoiceBox are reused rather than downloaded again.
 
 ## Run
 
-Double-click **`VoiceBridgeStudio.exe`** in the project folder (build it once
+Double-click **`VoiceBoxBridgeStudio.exe`** in the project folder (build it once
 with `launcher\build.bat`). It starts the one merged program on
 `http://127.0.0.1:17493` with this folder's `data\` workspace, opens your
 browser, and shows a tray icon with **Open**, **View Logs**, and **Quit**.

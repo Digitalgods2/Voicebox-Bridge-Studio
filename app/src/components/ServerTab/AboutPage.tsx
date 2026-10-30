@@ -45,12 +45,16 @@ export function AboutPage() {
       <div className="max-w-md mx-auto h-full flex items-center">
         <div className="flex flex-col items-center text-center space-y-5">
           <FadeIn delay={0}>
-            <img src={appLogo} alt="VoiceBridge Studio" className="w-20 h-20 object-contain" />
+            <img
+              src={appLogo}
+              alt="VoiceBox Bridge Studio"
+              className="sidebar-logo w-64 h-64 object-contain"
+            />
           </FadeIn>
 
           <FadeIn delay={80}>
             <div className="space-y-1.5">
-              <h1 className="text-lg font-semibold">VoiceBridge Studio</h1>
+              <h1 className="text-2xl font-semibold">VoiceBox Bridge Studio</h1>
               <p className="text-xs text-muted-foreground/60 h-4">
                 {version ? `v${version}` : '\u00A0'}
               </p>

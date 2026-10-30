@@ -25,7 +25,7 @@ async def root():
     frontend_dir = config.get_frontend_dir()
     if frontend_dir is not None:
         return FileResponse(frontend_dir / "index.html", media_type="text/html")
-    return {"message": "VoiceBridge Studio API", "version": __version__}
+    return {"message": "VoiceBox Bridge Studio API", "version": __version__}
 
 
 @router.post("/shutdown")

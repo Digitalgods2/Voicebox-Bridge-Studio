@@ -1,6 +1,6 @@
 # Notices and credits
 
-VoiceBridge Studio is built on **VoiceBox** by Jamie Pine and the Voicebox
+VoiceBox Bridge Studio is built on **VoiceBox** by Jamie Pine and the Voicebox
 contributors: <https://github.com/jamiepine/voicebox>. VoiceBox's source was
 imported from commit `8af7efe62fab8d33e2a5dfbedabaa45f68a5184f` (version 0.6.0)
 and has since been modified: speech-to-speech was added as a built-in feature,

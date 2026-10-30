@@ -35,10 +35,10 @@ const tabs: Array<{
   { id: 'captures', path: '/captures', icon: Captions, labelKey: 'nav.captures' },
   { id: 'voices', path: '/voices', icon: Mic, labelKey: 'nav.voices' },
   {
-    id: 'voice-changer',
-    path: '/voice-changer',
+    id: 'speech-to-speech',
+    path: '/speech-to-speech',
     icon: AudioWaveform,
-    labelKey: 'nav.voiceChanger',
+    labelKey: 'nav.speechToSpeech',
   },
   { id: 'effects', path: '/effects', icon: Wand2, labelKey: 'nav.effects' },
   { id: 'models', path: '/models', icon: Box, labelKey: 'nav.models' },

@@ -22,6 +22,7 @@ from uuid import UUID, uuid4
 import wave
 
 from .audio_effects import AudioEffectsProcessor, validate_audio_adjustments
+from .media_store import MediaInUseError
 from .youtube_cache import YouTubeCacheError, YouTubeSourceCache
 
 
@@ -933,6 +934,30 @@ class YouTubeJobService:
                 except (ValueError, TypeError, YouTubeJobError):
                     pass
         return manifest
+
+    def video_input_in_use(self, video_input_id: str) -> bool:
+        """Whether a queued or running local-video job still needs this upload."""
+        with self._manifest_lock:
+            for manifest_path in self.jobs_dir.glob("*/manifest.json"):
+                try:
+                    manifest = _read_json(manifest_path)
+                except (OSError, ValueError, YouTubeJobError):
+                    continue
+                if manifest.get("video_input_id") == video_input_id and manifest.get("status") in {"queued", "running"}:
+                    return True
+        return False
+
+    def delete_job(self, job_id: str) -> None:
+        """Delete a finished video job's folder, including its output video."""
+        job_id = _uuid(job_id, "job_id")
+        with self._manifest_lock:
+            manifest = self._read_manifest(job_id)
+            if manifest.get("status") in {"queued", "running"}:
+                raise MediaInUseError("This video job is still running; wait for it to finish.")
+            job_dir = self._job_dir(job_id)
+            if job_dir.parent != self.jobs_dir.resolve() or job_dir.is_symlink():
+                raise ValueError("Video job folder is outside the jobs directory")
+            shutil.rmtree(job_dir)
 
     def resolve_output(self, job_id: str) -> Path:
         job_id = _uuid(job_id, "job_id")

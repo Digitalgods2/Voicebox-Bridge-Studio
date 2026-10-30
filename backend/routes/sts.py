@@ -23,7 +23,7 @@ from starlette.concurrency import run_in_threadpool
 from ..sts.audio_effects import MAX_BRIGHTNESS_DB, MAX_PITCH_SEMITONES, AudioEffectsError
 from ..sts.audio_jobs import AudioJobs
 from ..sts.conversion_service import ConversionService
-from ..sts.media_store import MediaStore
+from ..sts.media_store import MediaInUseError, MediaStore
 from ..sts.openvoice_engine import OpenVoiceEngine, OpenVoiceError
 from ..sts.settings import STSSettings
 from ..sts.storage_cleanup import StorageCleanup
@@ -400,6 +400,60 @@ def output_media(job_id: str) -> FileResponse:
 @router.get("/media/video-jobs/{job_id}", response_class=FileResponse)
 def video_output_media(job_id: str) -> FileResponse:
     return _resolve_media(lambda: get_runtime().youtube.resolve_output(job_id))
+
+
+def _delete(operation: Any) -> dict[str, bool]:
+    try:
+        operation()
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+    except FileNotFoundError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+    except MediaInUseError as exc:
+        raise HTTPException(status_code=409, detail=str(exc)) from exc
+    return {"deleted": True}
+
+
+@router.delete("/inputs/{input_id}")
+def delete_input(input_id: str) -> dict[str, bool]:
+    """Delete an uploaded audio file, unless a queued or running job still needs it."""
+    runtime = get_runtime()
+
+    def delete() -> None:
+        runtime.media.resolve_input(input_id)  # validates the ID and 404s before the in-use check
+        if runtime.audio_jobs.input_in_use(input_id):
+            raise MediaInUseError("This audio is being converted; wait for the job to finish.")
+        runtime.media.delete_input(input_id)
+
+    return _delete(delete)
+
+
+@router.delete("/video-inputs/{video_input_id}")
+def delete_video_input(video_input_id: str) -> dict[str, bool]:
+    """Delete an imported video, unless a queued or running job still needs it."""
+    runtime = get_runtime()
+
+    def delete() -> None:
+        runtime.media.resolve_video_input(video_input_id)
+        if runtime.youtube.video_input_in_use(video_input_id):
+            raise MediaInUseError("This video is being converted; wait for the job to finish.")
+        runtime.media.delete_video_input(video_input_id)
+
+    return _delete(delete)
+
+
+@router.delete("/audio/jobs/{job_id}")
+def delete_audio_job(job_id: UUID) -> dict[str, bool]:
+    """Delete a finished audio job and its converted WAV."""
+    runtime = get_runtime()
+    return _delete(lambda: runtime.audio_jobs.delete(str(job_id), runtime.media))
+
+
+@router.delete("/video/jobs/{job_id}")
+@router.delete("/youtube/jobs/{job_id}")
+def delete_video_job(job_id: str) -> dict[str, bool]:
+    """Delete a finished video job and its output video; a cached YouTube source is kept."""
+    return _delete(lambda: get_runtime().youtube.delete_job(job_id))
 
 
 @router.get("/media/youtube-cache/source", response_class=FileResponse)

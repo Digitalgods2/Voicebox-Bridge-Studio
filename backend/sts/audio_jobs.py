@@ -7,7 +7,7 @@ from typing import Any
 from uuid import uuid4
 
 from .conversion_service import ConversionService, _utc_now
-from .media_store import MediaStore, _uuid
+from .media_store import MediaInUseError, MediaStore, _uuid
 
 
 class AudioJobs:
@@ -53,6 +53,24 @@ class AudioJobs:
         jobs = [self.get(path.stem) for path in self.root.glob("*.json")]
         jobs.sort(key=lambda job: (job["created_at"], job["job_id"]), reverse=True)
         return jobs[offset:offset + limit]
+
+    def input_in_use(self, input_id: str) -> bool:
+        """Whether a queued or running job still needs this upload."""
+        return any(
+            job.get("input_id") == input_id and job["status"] in {"queued", "running"}
+            for job in (self.get(path.stem) for path in self.root.glob("*.json"))
+        )
+
+    def delete(self, job_id: str, media: MediaStore) -> None:
+        """Delete a finished job's record and its converted audio."""
+        with self._lock:
+            job = self.get(job_id)
+            if job["status"] in {"queued", "running"}:
+                raise MediaInUseError("This conversion is still running; wait for it to finish.")
+            if job.get("conversion_id"):
+                media.delete_output(job["conversion_id"])
+            with self._record_lock:
+                (self.root / f"{job['job_id']}.json").unlink(missing_ok=True)
 
     def run(self, job_id: str, media: MediaStore) -> None:
         # Also prevents duplicate execution of a job within this process.

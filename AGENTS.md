@@ -2,7 +2,7 @@
 
 ## Objective
 
-A fully local, offline voice studio built on Jamie Pine's VoiceBox (MIT). It keeps VoiceBox's TTS, voice cloning, stories, captures, effects, and model management, and adds speech-to-speech (the Voice Changer) as a built-in feature that converts existing speech or video recordings into a workspace voice profile while preserving the source timing, pacing, emphasis, and emotional performance as closely as the conversion engine permits.
+A fully local, offline voice studio built on Jamie Pine's VoiceBox (MIT). It keeps VoiceBox's TTS, voice cloning, stories, captures, effects, and model management, and adds speech-to-speech (Speech to Speech) as a built-in feature that converts existing speech or video recordings into a workspace voice profile while preserving the source timing, pacing, emphasis, and emotional performance as closely as the conversion engine permits.
 
 Long local and YouTube video conversions are a primary use case. There must be no cloud inference, paid API, subscription, or per-minute service dependency. A one-time local model download is acceptable only after the user approves its size and license.
 
@@ -35,7 +35,7 @@ Long local and YouTube video conversions are a primary use case. There must be n
 - When editing upstream components, change only the needed class strings; don't run the formatter over whole upstream files (they are not Biome-formatted, and reformatting them makes upstream merges painful).
 - `/stories`, `/captures`, `/settings/generation`, `/settings/captures` are app pages that collide with API GET routes; `backend/app.py` serves the SPA for browser page loads of them (`SPA_PAGES_SHADOWED_BY_API`).
 - `app/src/components/LaunchScreen/`: full-window title card shown once per browser tab on launch (emblem, gold "VoiceBox Bridge / Studio" wordmark, Press Enter to continue). Styles are the `.launch-screen*` rules in `app/src/index.css`; it stays dark in both themes.
-- `app/src/components/VoiceChangerTab/` + `app/src/lib/api/sts.ts`: the Voice Changer UI at route `/voice-changer`.
+- `app/src/components/VoiceChangerTab/` + `app/src/lib/api/sts.ts`: Speech to Speech UI at route `/voice-changer`.
 - `VoiceBoxBridgeStudio.exe` (built by `launcher/build.bat` from `launcher/launcher.py`, ignored by git) is the everyday launcher: a small windowed tray app that runs `backend.main` from `backend/venv` inside a kill-on-close job object and offers to close the standalone VoiceBox if it holds the port. `start-app.bat` is the console equivalent. Both serve `web/dist` from the backend with `--data-dir data`.
 - The pre-merge `VoiceBoxBridge.exe` was a frozen copy of the old bridge that started the installed VoiceBox; it was deleted. Never revive it.
 - The user's voices came from the installed VoiceBox library and were imported byte-identical into `data/`; a verified backup zip is in `data/backups/`. Never delete either copy. `scripts/import_voicebox_data.py` copies an installed VoiceBox library (`%APPDATA%\sh.voicebox.app`) into the workspace, read-only on the source.

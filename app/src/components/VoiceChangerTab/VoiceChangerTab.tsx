@@ -6,9 +6,21 @@ import {
   FileVideo,
   Loader2,
   Trash2,
+  X,
   Youtube,
 } from 'lucide-react';
 import { type ReactNode, useEffect, useMemo, useState } from 'react';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
@@ -118,7 +130,7 @@ export function VoiceChangerTab() {
   const engineReady = status.data?.engine.ready ?? false;
   const selection = profileId && sampleId ? { profile_id: profileId, sample_id: sampleId } : null;
   const blocker = !engineReady
-    ? 'The voice changer engine is not installed or not ready.'
+    ? 'The speech-to-speech engine is not installed or not ready.'
     : !selection
       ? 'Choose a voice and reference sample.'
       : !authorized
@@ -129,7 +141,7 @@ export function VoiceChangerTab() {
   return (
     <div className="flex flex-col h-full min-h-0">
       <div className="shrink-0 pb-4">
-        <h1 className="brand-title text-3xl leading-tight">Voice Changer</h1>
+        <h1 className="brand-title text-3xl leading-tight">Speech to Speech</h1>
         <p className="text-sm text-muted-foreground">
           Convert speech into one of your voices while keeping the original timing, pacing, and
           delivery.
@@ -284,7 +296,7 @@ function EngineNotice({
     <div className="mb-4 flex gap-3 rounded-lg border border-amber-500/40 bg-amber-500/10 p-4 text-sm">
       <AlertTriangle className="h-5 w-5 shrink-0 text-amber-500" />
       <div className="space-y-1">
-        <p className="font-medium">The voice changer engine is not ready.</p>
+        <p className="font-medium">The speech-to-speech engine is not ready.</p>
         <p className="text-muted-foreground">
           {status.error ??
             (missing.length > 0
@@ -410,26 +422,137 @@ function Panel({ title, children }: { title: string; children: ReactNode }) {
   );
 }
 
-function useFailureToast() {
+function useFailureToast(title = 'Conversion failed') {
   const { toast } = useToast();
   return (error: unknown) =>
     toast({
-      title: 'Conversion failed',
+      title,
       description: error instanceof Error ? error.message : String(error),
       variant: 'destructive',
     });
 }
 
-function AudioWorkflow({ request, blocker }: WorkflowProps) {
-  const notifyFailure = useFailureToast();
-  const [upload, setUpload] = useState<STSUpload | null>(null);
-  const [jobId, setJobId] = useState<string | null>(null);
+/** Clears a source: removes the upload from the app's storage and resets the picker. */
+function ClearButton(props: { onClear: () => void; disabled?: boolean; pending?: boolean }) {
+  return (
+    <Button
+      variant="outline"
+      size="sm"
+      onClick={props.onClear}
+      disabled={props.disabled || props.pending}
+      className="shrink-0"
+    >
+      {props.pending ? <Loader2 className="h-4 w-4 animate-spin" /> : <X className="h-4 w-4" />}
+      Clear
+    </Button>
+  );
+}
+
+/** Deletes a result after confirmation; it can't be undone. */
+function DeleteResultButton(props: { what: string; onConfirm: () => void; pending?: boolean }) {
+  return (
+    <AlertDialog>
+      <AlertDialogTrigger asChild>
+        <Button
+          variant="outline"
+          size="sm"
+          disabled={props.pending}
+          className="text-destructive hover:text-destructive hover:border-destructive/60 hover:bg-destructive/10"
+        >
+          {props.pending ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : (
+            <Trash2 className="h-4 w-4" />
+          )}
+          Delete
+        </Button>
+      </AlertDialogTrigger>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Delete this {props.what}?</AlertDialogTitle>
+          <AlertDialogDescription>
+            The converted file and its job record are removed from this computer. This can't be
+            undone. Your source and voices are not affected.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel>Cancel</AlertDialogCancel>
+          <AlertDialogAction
+            onClick={props.onConfirm}
+            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+          >
+            Delete
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+  );
+}
+
+/** Upload state for one source kind, with clearing and replacement cleanup. */
+function useSourceUpload(
+  upload: (file: File) => Promise<STSUpload>,
+  remove: (id: string) => Promise<unknown>,
+  idOf: (upload: STSUpload) => string | undefined,
+) {
+  const notifyFailure = useFailureToast('Could not use that file');
+  const notifyClearFailure = useFailureToast('Could not clear the source');
+  const [current, setCurrent] = useState<STSUpload | null>(null);
+  // Changing the key remounts the file input, which empties its selection.
+  const [pickerKey, setPickerKey] = useState(0);
 
   const uploadMutation = useMutation({
-    mutationFn: stsApi.uploadAudio,
-    onSuccess: setUpload,
+    mutationFn: upload,
+    onSuccess: (next) => {
+      const previous = current && idOf(current);
+      setCurrent(next);
+      // A replaced upload is no longer reachable from the page; remove it quietly.
+      if (previous) remove(previous).catch(() => undefined);
+    },
     onError: notifyFailure,
   });
+  const clearMutation = useMutation({
+    mutationFn: async () => {
+      const id = current && idOf(current);
+      if (id) await remove(id);
+    },
+    onSuccess: () => {
+      setCurrent(null);
+      setPickerKey((key) => key + 1);
+    },
+    onError: notifyClearFailure,
+  });
+
+  return { current, pickerKey, uploadMutation, clearMutation };
+}
+
+/** Deletes a finished job's output and forgets it on the page. */
+function useDeleteResult(
+  remove: (jobId: string) => Promise<unknown>,
+  jobId: string | null,
+  onDeleted: () => void,
+) {
+  const queryClient = useQueryClient();
+  const notifyFailure = useFailureToast('Could not delete the result');
+  return useMutation({
+    mutationFn: async () => {
+      if (jobId) await remove(jobId);
+    },
+    onSuccess: () => {
+      queryClient.removeQueries({ queryKey: ['sts', 'audio-job', jobId] });
+      queryClient.removeQueries({ queryKey: ['sts', 'video-job', jobId] });
+      onDeleted();
+    },
+    onError: notifyFailure,
+  });
+}
+
+function AudioWorkflow({ request, blocker }: WorkflowProps) {
+  const notifyFailure = useFailureToast();
+  const [jobId, setJobId] = useState<string | null>(null);
+  const source = useSourceUpload(stsApi.uploadAudio, stsApi.deleteAudioInput, (u) => u.input_id);
+  const upload = source.current;
+
   const convertMutation = useMutation({
     mutationFn: () => {
       if (!request || !upload?.input_id) throw new Error('Choose a voice and an audio file first.');
@@ -444,34 +567,59 @@ function AudioWorkflow({ request, blocker }: WorkflowProps) {
     enabled: !!jobId,
     refetchInterval: (query) => (isActive(query.state.data?.status) ? 1000 : false),
   });
+  const deleteResult = useDeleteResult(stsApi.deleteAudioJob, jobId, () => setJobId(null));
+  const converting = convertMutation.isPending || isActive(job.data?.status);
 
   return (
     <div className="space-y-5">
       <Panel title="Source audio">
-        <FilePicker
-          accept="audio/*,.wav,.mp3,.flac,.m4a,.aac,.ogg,.opus,.wma"
-          label="Source audio file"
-          disabled={uploadMutation.isPending}
-          onFile={(file) => {
-            setJobId(null);
-            uploadMutation.mutate(file);
-          }}
-        />
-        {uploadMutation.isPending && <p className="text-xs text-muted-foreground">Uploading…</p>}
+        <div className="flex items-center gap-2">
+          <FilePicker
+            key={source.pickerKey}
+            accept="audio/*,.wav,.mp3,.flac,.m4a,.aac,.ogg,.opus,.wma"
+            label="Source audio file"
+            disabled={source.uploadMutation.isPending}
+            onFile={(file) => source.uploadMutation.mutate(file)}
+          />
+          {upload && (
+            <ClearButton
+              onClear={() => source.clearMutation.mutate()}
+              disabled={converting}
+              pending={source.clearMutation.isPending}
+            />
+          )}
+        </div>
+        {source.uploadMutation.isPending && (
+          <p className="text-xs text-muted-foreground">Uploading…</p>
+        )}
         {upload && <MediaPreview kind="audio" src={stsUrl(upload.media_url)} />}
       </Panel>
       <ConvertBar
         blocker={blocker}
         ready={!!upload}
-        busy={convertMutation.isPending || isActive(job.data?.status)}
+        busy={converting}
         onConvert={() => convertMutation.mutate()}
       />
-      {job.data && <AudioJobResult job={job.data} />}
+      {job.data && (
+        <AudioJobResult
+          job={job.data}
+          onDelete={() => deleteResult.mutate()}
+          deleting={deleteResult.isPending}
+        />
+      )}
     </div>
   );
 }
 
-function AudioJobResult({ job }: { job: STSAudioJob }) {
+function AudioJobResult({
+  job,
+  onDelete,
+  deleting,
+}: {
+  job: STSAudioJob;
+  onDelete: () => void;
+  deleting: boolean;
+}) {
   if (isActive(job.status)) {
     return (
       <p className="flex items-center gap-2 text-sm text-muted-foreground">
@@ -481,33 +629,41 @@ function AudioJobResult({ job }: { job: STSAudioJob }) {
     );
   }
   if (job.status === 'failed') {
-    return <p className="text-sm text-destructive">{job.error?.message ?? 'Conversion failed.'}</p>;
+    return (
+      <div className="flex items-center justify-between gap-3">
+        <p className="text-sm text-destructive">{job.error?.message ?? 'Conversion failed.'}</p>
+        <DeleteResultButton what="failed conversion" onConfirm={onDelete} pending={deleting} />
+      </div>
+    );
   }
   if (!job.download_url) return null;
   const url = stsUrl(job.download_url);
   return (
     <Panel title="Converted audio">
       <MediaPreview kind="audio" src={url} />
-      <Button variant="outline" size="sm" asChild>
-        <a href={url} download>
-          <Download className="h-4 w-4" /> Download WAV
-        </a>
-      </Button>
+      <div className="flex gap-2">
+        <Button variant="outline" size="sm" asChild>
+          <a href={url} download>
+            <Download className="h-4 w-4" /> Download WAV
+          </a>
+        </Button>
+        <DeleteResultButton what="converted audio" onConfirm={onDelete} pending={deleting} />
+      </div>
     </Panel>
   );
 }
 
 function VideoWorkflow({ request, blocker }: WorkflowProps) {
   const notifyFailure = useFailureToast();
-  const [upload, setUpload] = useState<STSUpload | null>(null);
   const [outputFormat, setOutputFormat] = useState<STSOutputFormat>('mkv');
   const [jobId, setJobId] = useState<string | null>(null);
+  const source = useSourceUpload(
+    stsApi.uploadVideo,
+    stsApi.deleteVideoInput,
+    (u) => u.video_input_id,
+  );
+  const upload = source.current;
 
-  const uploadMutation = useMutation({
-    mutationFn: stsApi.uploadVideo,
-    onSuccess: setUpload,
-    onError: notifyFailure,
-  });
   const convertMutation = useMutation({
     mutationFn: () => {
       if (!request || !upload?.video_input_id)
@@ -522,20 +678,29 @@ function VideoWorkflow({ request, blocker }: WorkflowProps) {
     onError: notifyFailure,
   });
   const job = useVideoJob(jobId, stsApi.videoJob);
+  const deleteResult = useDeleteResult(stsApi.deleteVideoJob, jobId, () => setJobId(null));
+  const converting = convertMutation.isPending || isActive(job.data?.status);
 
   return (
     <div className="space-y-5">
       <Panel title="Source video">
-        <FilePicker
-          accept="video/*"
-          label="Source video file"
-          disabled={uploadMutation.isPending}
-          onFile={(file) => {
-            setJobId(null);
-            uploadMutation.mutate(file);
-          }}
-        />
-        {uploadMutation.isPending && (
+        <div className="flex items-center gap-2">
+          <FilePicker
+            key={source.pickerKey}
+            accept="video/*"
+            label="Source video file"
+            disabled={source.uploadMutation.isPending}
+            onFile={(file) => source.uploadMutation.mutate(file)}
+          />
+          {upload && (
+            <ClearButton
+              onClear={() => source.clearMutation.mutate()}
+              disabled={converting}
+              pending={source.clearMutation.isPending}
+            />
+          )}
+        </div>
+        {source.uploadMutation.isPending && (
           <p className="text-xs text-muted-foreground">Uploading video…</p>
         )}
         {upload && (
@@ -546,10 +711,16 @@ function VideoWorkflow({ request, blocker }: WorkflowProps) {
       <ConvertBar
         blocker={blocker}
         ready={!!upload}
-        busy={convertMutation.isPending || isActive(job.data?.status)}
+        busy={converting}
         onConvert={() => convertMutation.mutate()}
       />
-      {job.data && <VideoJobResult job={job.data} />}
+      {job.data && (
+        <VideoJobResult
+          job={job.data}
+          onDelete={() => deleteResult.mutate()}
+          deleting={deleteResult.isPending}
+        />
+      )}
     </div>
   );
 }
@@ -580,6 +751,9 @@ function YouTubeWorkflow({ request, blocker }: WorkflowProps) {
     onError: notifyFailure,
   });
   const job = useVideoJob(jobId, stsApi.youtubeJob);
+  // YouTube jobs live in the same job store as local video jobs.
+  const deleteResult = useDeleteResult(stsApi.deleteVideoJob, jobId, () => setJobId(null));
+  const converting = convertMutation.isPending || isActive(job.data?.status);
 
   useEffect(() => {
     if (job.data?.status === 'completed')
@@ -589,11 +763,14 @@ function YouTubeWorkflow({ request, blocker }: WorkflowProps) {
   return (
     <div className="space-y-5">
       <Panel title="YouTube video">
-        <Input
-          placeholder="https://www.youtube.com/watch?v=…"
-          value={url}
-          onChange={(event) => setUrl(event.target.value)}
-        />
+        <div className="flex items-center gap-2">
+          <Input
+            placeholder="https://www.youtube.com/watch?v=…"
+            value={url}
+            onChange={(event) => setUrl(event.target.value)}
+          />
+          {url && <ClearButton onClear={() => setUrl('')} disabled={converting} />}
+        </div>
         <p className="text-xs text-muted-foreground">
           One video is downloaded and kept locally so reconverting it with another voice needs no
           new download.
@@ -618,7 +795,7 @@ function YouTubeWorkflow({ request, blocker }: WorkflowProps) {
             <Button
               variant="ghost"
               size="sm"
-              disabled={clearCache.isPending || isActive(job.data?.status)}
+              disabled={clearCache.isPending || converting}
               onClick={() => clearCache.mutate()}
               aria-label="Clear cached download"
             >
@@ -631,10 +808,16 @@ function YouTubeWorkflow({ request, blocker }: WorkflowProps) {
       <ConvertBar
         blocker={blocker}
         ready={url.trim().length > 0}
-        busy={convertMutation.isPending || isActive(job.data?.status)}
+        busy={converting}
         onConvert={() => convertMutation.mutate()}
       />
-      {job.data && <VideoJobResult job={job.data} />}
+      {job.data && (
+        <VideoJobResult
+          job={job.data}
+          onDelete={() => deleteResult.mutate()}
+          deleting={deleteResult.isPending}
+        />
+      )}
     </div>
   );
 }
@@ -650,13 +833,26 @@ function useVideoJob(jobId: string | null, fetchJob: (jobId: string) => Promise<
   });
 }
 
-function VideoJobResult({ job }: { job: STSVideoJob }) {
+function VideoJobResult({
+  job,
+  onDelete,
+  deleting,
+}: {
+  job: STSVideoJob;
+  onDelete: () => void;
+  deleting: boolean;
+}) {
   const stage = useMemo(
     () => STAGE_LABELS[job.stage ?? job.status] ?? job.stage ?? job.status,
     [job],
   );
   if (job.status === 'failed') {
-    return <p className="text-sm text-destructive">{job.error?.message ?? 'Conversion failed.'}</p>;
+    return (
+      <div className="flex items-center justify-between gap-3">
+        <p className="text-sm text-destructive">{job.error?.message ?? 'Conversion failed.'}</p>
+        <DeleteResultButton what="failed conversion" onConfirm={onDelete} pending={deleting} />
+      </div>
+    );
   }
   if (isActive(job.status)) {
     const chunks =
@@ -683,11 +879,14 @@ function VideoJobResult({ job }: { job: STSVideoJob }) {
   return (
     <Panel title="Converted video">
       <MediaPreview kind="video" src={url} />
-      <Button variant="outline" size="sm" asChild>
-        <a href={url} download>
-          <Download className="h-4 w-4" /> Download {job.output_format.toUpperCase()}
-        </a>
-      </Button>
+      <div className="flex gap-2">
+        <Button variant="outline" size="sm" asChild>
+          <a href={url} download>
+            <Download className="h-4 w-4" /> Download {job.output_format.toUpperCase()}
+          </a>
+        </Button>
+        <DeleteResultButton what="converted video" onConfirm={onDelete} pending={deleting} />
+      </div>
     </Panel>
   );
 }

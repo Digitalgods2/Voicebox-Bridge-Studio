@@ -36,6 +36,10 @@ def _uuid(value: str, label: str) -> str:
         raise ValueError(f"{label} must be a UUID") from exc
 
 
+class MediaInUseError(RuntimeError):
+    """Raised when deleting media that a queued or running job still needs."""
+
+
 class MediaStore:
     """Store and resolve browser-provided media beneath the bridge data directory."""
 
@@ -54,6 +58,7 @@ class MediaStore:
         self.inputs_dir = self.data_dir / "inputs"
         self.video_inputs_dir = self.data_dir / "video_inputs"
         self.outputs_dir = self.data_dir / "outputs"
+        self.conversion_jobs_dir = self.data_dir / "jobs"
         self.references_dir = self.data_dir / "references"
 
     async def store_input(
@@ -260,6 +265,31 @@ class MediaStore:
             self.references_dir,
             "Reference media",
         )
+
+    def delete_input(self, input_id: str) -> None:
+        """Delete an uploaded audio input and its metadata."""
+        self._delete_uploaded(self.resolve_input(input_id), self.inputs_dir)
+
+    def delete_video_input(self, video_input_id: str) -> None:
+        """Delete an imported video and its metadata."""
+        self._delete_uploaded(self.resolve_video_input(video_input_id), self.video_inputs_dir)
+
+    def delete_output(self, conversion_id: str) -> None:
+        """Delete a conversion's WAV result and its manifest; already-missing files are fine."""
+        conversion_id = _uuid(conversion_id, "conversion_id")
+        for path, root in (
+            (self.outputs_dir / f"{conversion_id}.wav", self.outputs_dir),
+            (self.conversion_jobs_dir / f"{conversion_id}.json", self.conversion_jobs_dir),
+        ):
+            try:
+                self._existing_contained_file(path, root, "Conversion file").unlink()
+            except FileNotFoundError:
+                pass
+
+    def _delete_uploaded(self, media_path: Path, media_dir: Path) -> None:
+        # media_path is already resolved inside media_dir; its stem is the upload UUID.
+        media_path.unlink()
+        (media_dir / f"{media_path.stem}.json").unlink(missing_ok=True)
 
     @staticmethod
     def _safe_name(

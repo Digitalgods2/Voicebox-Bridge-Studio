@@ -160,3 +160,60 @@ def test_status_polling_during_manifest_updates(tmp_path):
         futures = [pool.submit(write), pool.submit(read), pool.submit(read)]
         for future in futures:
             future.result()
+
+
+def test_delete_input_and_finished_job(endpoint, tmp_path):
+    request, profile, sample, payload, _ = endpoint
+    upload = request("/sts/inputs?filename=clip.wav", payload)[2]
+    job = request("/sts/audio/jobs", {"input_id": upload["input_id"], "profile_id": profile,
+                                      "sample_id": sample, "authorized": True})[2]
+    done = wait_job(request, job["status_url"])
+    assert done["status"] == "completed"
+    output = tmp_path / "outputs" / f"{done['conversion_id']}.wav"
+    assert output.is_file()
+
+    assert request(job["status_url"], method="DELETE")[2] == {"deleted": True}
+    assert not output.exists()
+    assert not (tmp_path / "jobs" / f"{done['conversion_id']}.json").exists()
+    assert request(job["status_url"])[0] == 404
+    assert request(job["status_url"], method="DELETE")[0] == 404
+
+    assert request(f"/sts/inputs/{upload['input_id']}", method="DELETE")[2] == {"deleted": True}
+    assert not list((tmp_path / "inputs").glob(f"{upload['input_id']}*"))
+    assert request(f"/sts/media/inputs/{upload['input_id']}")[0] == 404
+    assert request(f"/sts/inputs/{upload['input_id']}", method="DELETE")[0] == 404
+    assert request("/sts/inputs/not-a-uuid", method="DELETE")[0] == 422
+
+
+def test_media_needed_by_a_queued_job_cannot_be_deleted(endpoint, monkeypatch):
+    request, profile, _, payload, _ = endpoint
+    monkeypatch.setattr(AudioJobs, "run", lambda *args: None)
+    upload = request("/sts/inputs?filename=clip.wav", payload)[2]
+    job = request("/sts/audio/jobs", {"input_id": upload["input_id"], "profile_id": profile,
+                                      "authorized": True})[2]
+    assert request(job["status_url"], method="DELETE")[0] == 409
+    code, _, body = request(f"/sts/inputs/{upload['input_id']}", method="DELETE")
+    assert code == 409 and "being converted" in body["detail"]
+
+
+def test_delete_video_job_keeps_other_media(endpoint, tmp_path):
+    import json
+
+    request, *_ = endpoint
+    jobs = tmp_path / "video_jobs"
+    finished, running = str(uuid4()), str(uuid4())
+    for job_id, status in ((finished, "completed"), (running, "running")):
+        (jobs / job_id).mkdir(parents=True)
+        (jobs / job_id / "manifest.json").write_text(json.dumps({"job_id": job_id, "status": status}))
+        (jobs / job_id / "output.mkv").write_bytes(b"video")
+    cache = tmp_path / "youtube_cache" / "current"
+    cache.mkdir(parents=True)
+    (cache / "source.mp4").write_bytes(b"cached source")
+
+    assert request(f"/sts/video/jobs/{running}", method="DELETE")[0] == 409
+    assert request(f"/sts/youtube/jobs/{finished}", method="DELETE")[2] == {"deleted": True}
+    assert not (jobs / finished).exists()
+    assert (jobs / running / "output.mkv").is_file()
+    assert (cache / "source.mp4").is_file()
+    assert request(f"/sts/video/jobs/{finished}", method="DELETE")[0] == 404
+    assert request("/sts/video/jobs/../../profiles", method="DELETE")[0] in {404, 422}

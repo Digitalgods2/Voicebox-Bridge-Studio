@@ -1,6 +1,6 @@
 import { useServerStore } from '@/stores/serverStore';
 
-// Speech-to-speech (voice changer) client. STS runs inside the same backend
+// Speech to Speech client. STS runs inside the same backend
 // as TTS and reads the same voice profiles, so it shares the server URL.
 
 export type STSOutputFormat = 'mkv' | 'mp4';
@@ -64,6 +64,10 @@ export interface STSVideoJob {
   media_url: string;
   output_format: STSOutputFormat;
   error?: STSJobError;
+}
+
+export interface STSDeleted {
+  deleted: boolean;
 }
 
 export interface STSUpload {
@@ -138,6 +142,9 @@ export const stsApi = {
 
   uploadAudio: (file: File) => uploadRaw('/sts/inputs', file),
   uploadVideo: (file: File) => uploadRaw('/sts/video-inputs', file),
+  deleteAudioInput: (inputId: string) => sendJson<STSDeleted>(`/sts/inputs/${inputId}`, 'DELETE'),
+  deleteVideoInput: (videoInputId: string) =>
+    sendJson<STSDeleted>(`/sts/video-inputs/${videoInputId}`, 'DELETE'),
 
   createAudioJob: (
     body: {
@@ -148,6 +155,7 @@ export const stsApi = {
     } & STSAdjustments,
   ) => sendJson<STSAudioJob>('/sts/audio/jobs', 'POST', body),
   audioJob: (jobId: string) => getJson<STSAudioJob>(`/sts/audio/jobs/${jobId}`),
+  deleteAudioJob: (jobId: string) => sendJson<STSDeleted>(`/sts/audio/jobs/${jobId}`, 'DELETE'),
 
   createVideoJob: (
     body: {
@@ -159,6 +167,7 @@ export const stsApi = {
     } & STSAdjustments,
   ) => sendJson<STSVideoJob>('/sts/video/jobs', 'POST', body),
   videoJob: (jobId: string) => getJson<STSVideoJob>(`/sts/video/jobs/${jobId}`),
+  deleteVideoJob: (jobId: string) => sendJson<STSDeleted>(`/sts/video/jobs/${jobId}`, 'DELETE'),
 
   createYouTubeJob: (
     body: {

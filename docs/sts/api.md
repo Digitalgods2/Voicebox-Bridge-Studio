@@ -62,6 +62,20 @@ curl.exe "http://127.0.0.1:17493/sts/voices"
 curl.exe -X POST "http://127.0.0.1:17493/sts/speech?filename=speech.wav&profile_id=PROFILE_UUID&authorized=true" -H "Content-Type: application/octet-stream" --data-binary "@speech.wav"
 ```
 
+## Delete uploads and results
+
+| Method and path | Removes |
+| --- | --- |
+| `DELETE /sts/inputs/{input_id}` | An uploaded audio file and its metadata |
+| `DELETE /sts/video-inputs/{video_input_id}` | An imported video and its metadata |
+| `DELETE /sts/audio/jobs/{job_id}` | A finished audio job's record and converted WAV |
+| `DELETE /sts/video/jobs/{job_id}` (or `/sts/youtube/jobs/{job_id}`) | A finished video job's folder, including its output video |
+
+Each returns `{"deleted": true}`. Unknown IDs return **404** and malformed IDs
+**422**. An upload or job that a queued or running job still needs returns
+**409**; wait for the job to finish. Deleting a YouTube job keeps the cached
+source video; clear it separately with `DELETE /sts/youtube/cache`.
+
 ## Reuse uploads and other workflows
 
 Upload once with `POST /sts/inputs?filename=speech.wav` (raw bytes), then submit

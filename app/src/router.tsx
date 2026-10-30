@@ -121,11 +121,20 @@ const voicesRoute = createRoute({
   component: VoicesTab,
 });
 
-// Voice changer (speech-to-speech) route
-const voiceChangerRoute = createRoute({
+// Speech to Speech route
+const speechToSpeechRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/speech-to-speech',
+  component: VoiceChangerTab,
+});
+
+// The page was first published as /voice-changer; keep old links working.
+const voiceChangerRedirectRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/voice-changer',
-  component: VoiceChangerTab,
+  beforeLoad: () => {
+    throw redirect({ to: '/speech-to-speech' });
+  },
 });
 
 // Captures route (prototype — will replace AudioTab once the new flow is ready)
@@ -220,7 +229,8 @@ const routeTree = rootRoute.addChildren([
   storiesRoute,
   capturesRoute,
   voicesRoute,
-  voiceChangerRoute,
+  speechToSpeechRoute,
+  voiceChangerRedirectRoute,
   effectsRoute,
   modelsRoute,
   settingsRoute.addChildren([

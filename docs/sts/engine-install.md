@@ -1,6 +1,6 @@
 # Installing the speech-to-speech engine
 
-The Voice Changer runs OpenVoice V2 in its own isolated Python 3.10
+Speech to Speech runs OpenVoice V2 in its own isolated Python 3.10
 environment, separate from the app's backend environment. The backend starts
 it as a subprocess, passes only file paths, and forces Hugging Face offline
 mode, so the engine never downloads anything at conversion time.
@@ -118,7 +118,7 @@ backend\venv\Scripts\python -m backend.sts engine-probe
 `engine-status` checks files and imports without loading the model.
 `engine-probe` loads the model on the configured device (`cuda:0` by default;
 pass `--device cpu` on a CPU-only machine) and reports device and peak memory.
-In the app, the Voice Changer tab shows a notice whenever the engine is not ready.
+In the app, the Speech to Speech screen shows a notice whenever the engine is not ready.
 
 ## Quality and timing model
 

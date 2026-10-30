@@ -11,9 +11,9 @@ from urllib.request import urlopen
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--port", type=int, default=8765)
+    parser.add_argument("--port", type=int, default=17493)
     parser.add_argument("--input", type=Path)
-    parser.add_argument("--voice", help="VoiceBox profile UUID")
+    parser.add_argument("--voice", help="Voice profile UUID")
     parser.add_argument("--sample", help="Reference sample UUID, required if the voice has several")
     parser.add_argument("--output", type=Path, default=Path("converted.wav"))
     parser.add_argument("--authorized", action="store_true", help="Confirm permission to use the source and voice")
@@ -21,7 +21,7 @@ def main():
     args = parser.parse_args()
     base = f"http://127.0.0.1:{args.port}"
     if args.input is None:
-        with urlopen(base + "/api/voices", timeout=30) as response:
+        with urlopen(base + "/sts/voices", timeout=30) as response:
             print(json.dumps(json.load(response), indent=2))
         return
     if not args.voice or not args.authorized:
@@ -34,7 +34,7 @@ def main():
     connection = http.client.HTTPConnection("127.0.0.1", args.port, timeout=120)
     try:
         with args.input.open("rb") as source:
-            connection.request("POST", "/api/speech?" + urlencode(query), body=source, headers={
+            connection.request("POST", "/sts/speech?" + urlencode(query), body=source, headers={
                 "Content-Type": "application/octet-stream", "Content-Length": str(args.input.stat().st_size)
             })
         response = connection.getresponse()

@@ -148,8 +148,8 @@ def create_app() -> FastAPI:
     lifespan = compose_lifespan(voicebox_lifespan, mcp_app.router.lifespan_context)
 
     application = FastAPI(
-        title="voicebox API",
-        description="Production-quality Qwen3-TTS voice cloning API",
+        title="VoiceBridge Studio API",
+        description="Local text-to-speech, voice cloning, and speech-to-speech API",
         version=__version__,
         lifespan=lifespan,
     )
@@ -188,15 +188,20 @@ def _configure_cors(application: FastAPI) -> None:
 
 
 def _mount_frontend(application: FastAPI) -> None:
-    """Serve the built web frontend when present (Docker / web deployment).
+    """Serve the built web frontend when present (Docker, web, or local launcher).
 
-    The Dockerfile copies the Vite build output to ``/app/frontend/``.  When
-    that directory exists we mount static assets and add a catch-all route so
-    the React SPA handles client-side routing.  In dev or API-only mode the
-    directory is absent and this function is a no-op.
+    The Dockerfile copies the Vite build output to ``/app/frontend/``; a local
+    build stays in ``web/dist/``.  When either directory exists we mount static
+    assets and add a catch-all route so the React SPA handles client-side
+    routing.  In dev or API-only mode neither exists and this is a no-op.
     """
-    frontend_dir = Path(__file__).resolve().parent.parent / "frontend"
-    if not frontend_dir.is_dir():
+    project_root = Path(__file__).resolve().parent.parent
+    # Docker copies the build to frontend/; a local `bun run build:web` leaves it in web/dist/.
+    frontend_dir = next(
+        (path for path in (project_root / "frontend", project_root / "web" / "dist") if path.is_dir()),
+        None,
+    )
+    if frontend_dir is None:
         return
 
     from fastapi.staticfiles import StaticFiles
@@ -266,7 +271,7 @@ async def _run_startup(application: FastAPI) -> None:
     import platform
     import sys
 
-    logger.info("Voicebox v%s starting up", __version__)
+    logger.info("VoiceBridge Studio v%s starting up", __version__)
     logger.info(
         "Python %s on %s %s (%s)",
         sys.version.split()[0],
@@ -342,6 +347,12 @@ async def _run_startup(application: FastAPI) -> None:
     create_background_task(check_and_update_cuda_binary())
     create_background_task(check_and_update_rocm_binary())
 
+    # Speech-to-speech shares this data directory: fail interrupted voice
+    # changer jobs from a previous process and prune expired job media.
+    from .routes.sts import run_sts_startup
+
+    await asyncio.to_thread(run_sts_startup)
+
     try:
         progress_manager = get_progress_manager()
         progress_manager._set_main_loop(asyncio.get_running_loop())
@@ -362,7 +373,7 @@ async def _run_startup(application: FastAPI) -> None:
 
 async def _run_shutdown() -> None:
     """Unload models on lifespan exit."""
-    logger.info("Voicebox server shutting down...")
+    logger.info("VoiceBridge Studio server shutting down...")
     try:
         tts.unload_tts_model()
     except Exception:

@@ -1,6 +1,6 @@
 import { RouterProvider } from '@tanstack/react-router';
 import { useEffect, useRef, useState } from 'react';
-import voiceboxLogo from '@/assets/voicebox-logo.png';
+import appLogo from '@/assets/app-logo.png';
 import { DictateWindow } from '@/components/DictateWindow/DictateWindow';
 import ShinyText from '@/components/ShinyText';
 import { TitleBarDragRegion } from '@/components/TitleBarDragRegion';
@@ -8,8 +8,8 @@ import { useAutoUpdater } from '@/hooks/useAutoUpdater';
 import { useThemeSync } from '@/hooks/useThemeSync';
 import { apiClient } from '@/lib/api/client';
 import type { HealthResponse } from '@/lib/api/types';
-import { useChordSync } from '@/lib/hooks/useChordSync';
 import { TOP_SAFE_AREA_PADDING } from '@/lib/constants/ui';
+import { useChordSync } from '@/lib/hooks/useChordSync';
 import { cn } from '@/lib/utils/cn';
 import { usePlatform } from '@/platform/PlatformContext';
 import { router } from '@/router';
@@ -264,8 +264,8 @@ function MainApp() {
               <div className="w-48 h-48 rounded-full bg-accent/20 blur-3xl" />
             </div>
             <img
-              src={voiceboxLogo}
-              alt="Voicebox"
+              src={appLogo}
+              alt="VoiceBridge Studio"
               className="w-48 h-48 object-contain animate-fade-in-scale relative z-10"
             />
           </div>

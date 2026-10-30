@@ -7,6 +7,10 @@ pydantic>=2.5.0
 sqlalchemy>=2.0.0
 alembic>=1.13.0
 
+# Speech-to-speech: authorized YouTube source downloads. OpenVoice itself runs
+# in an isolated environment (see docs/sts/engine-install.md), not this one.
+yt-dlp>=2026.7.4,<2027
+
 # ML models
 # 2.5 is the first release with torch.nn.Buffer, which the vendored Higgs
 # Audio V2 codec uses (backend/vendor/higgs_audio_v2_tokenizer). The old >=2.2

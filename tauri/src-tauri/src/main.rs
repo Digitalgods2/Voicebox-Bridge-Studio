@@ -974,13 +974,14 @@ fn stop_audio_playback(
 ///
 /// Value matches what `focus_capture::capture_focus` writes into
 /// `FocusSnapshot::bundle_id` on the current platform — reverse-DNS bundle
-/// id on macOS, lowercased exe basename on Windows/Linux.
+/// id on macOS, lowercased exe basename on Windows/Linux. Keep these in sync
+/// with `identifier` and `mainBinaryName` in tauri.conf.json.
 #[cfg(target_os = "macos")]
-const VOICEBOX_BUNDLE_ID: &str = "sh.voicebox.app";
+const VOICEBOX_BUNDLE_ID: &str = "com.digitalgods.voicebridge";
 #[cfg(target_os = "windows")]
-const VOICEBOX_BUNDLE_ID: &str = "voicebox.exe";
+const VOICEBOX_BUNDLE_ID: &str = "voicebridge-studio.exe";
 #[cfg(not(any(target_os = "macos", target_os = "windows")))]
-const VOICEBOX_BUNDLE_ID: &str = "voicebox";
+const VOICEBOX_BUNDLE_ID: &str = "voicebridge-studio";
 
 /// Milliseconds to wait between activating the target app and firing the
 /// synthetic ⌘V, giving AppKit time to finish re-ordering windows and

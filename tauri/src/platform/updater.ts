@@ -2,6 +2,12 @@ import { relaunch } from '@tauri-apps/plugin-process';
 import { check, type Update } from '@tauri-apps/plugin-updater';
 import type { PlatformUpdater, UpdateStatus } from '@/platform/types';
 
+// Upstream builds updated from VoiceBox's own signed GitHub releases. This app
+// has no release feed yet, so update checks are off. To enable them, generate a
+// signing key (`bun run generate:keys`), set plugins.updater.pubkey/endpoints in
+// tauri.conf.json to your own, then flip this flag.
+const UPDATE_FEED_CONFIGURED = false;
+
 // Check if we're on Windows (NSIS installer handles restart automatically)
 const isWindows = () => {
   return navigator.userAgent.includes('Windows');
@@ -37,6 +43,7 @@ class TauriUpdater implements PlatformUpdater {
   }
 
   async checkForUpdates(): Promise<void> {
+    if (!UPDATE_FEED_CONFIGURED) return;
     try {
       this.status = { ...this.status, checking: true, error: undefined };
       this.notifySubscribers();

@@ -22,6 +22,7 @@ import { SettingsLayout } from '@/components/ServerTab/ServerTab';
 import { Sidebar } from '@/components/Sidebar';
 import { StoriesTab } from '@/components/StoriesTab/StoriesTab';
 import { Toaster } from '@/components/ui/toaster';
+import { VoiceChangerTab } from '@/components/VoiceChangerTab/VoiceChangerTab';
 import { VoicesTab } from '@/components/VoicesTab/VoicesTab';
 import { useGenerationProgress } from '@/lib/hooks/useGenerationProgress';
 import { useModelDownloadToast } from '@/lib/hooks/useModelDownloadToast';
@@ -111,6 +112,13 @@ const voicesRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/voices',
   component: VoicesTab,
+});
+
+// Voice changer (speech-to-speech) route
+const voiceChangerRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/voice-changer',
+  component: VoiceChangerTab,
 });
 
 // Captures route (prototype — will replace AudioTab once the new flow is ready)
@@ -205,6 +213,7 @@ const routeTree = rootRoute.addChildren([
   storiesRoute,
   capturesRoute,
   voicesRoute,
+  voiceChangerRoute,
   effectsRoute,
   modelsRoute,
   settingsRoute.addChildren([

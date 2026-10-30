@@ -4,7 +4,9 @@ from collections.abc import AsyncIterable
 import json
 import os
 from pathlib import Path, PurePosixPath
+import shutil
 import tempfile
+import time
 from typing import Any
 from uuid import UUID, uuid4
 
@@ -38,6 +40,38 @@ def _uuid(value: str, label: str) -> str:
 
 class MediaInUseError(RuntimeError):
     """Raised when deleting media that a queued or running job still needs."""
+
+
+FILE_IN_USE_MESSAGE = "The file is still open, probably playing in the app. Stop playback and try again."
+
+
+def remove_file(path: Path, *, attempts: int = 20, delay: float = 0.25) -> None:
+    """Delete a file, waiting briefly for Windows to release it.
+
+    Windows refuses to delete a file while any process has it open, such as
+    the app streaming it to a player that was just stopped. Missing files are fine.
+    """
+    for attempt in range(attempts):
+        try:
+            path.unlink(missing_ok=True)
+            return
+        except PermissionError:
+            if attempt == attempts - 1:
+                raise MediaInUseError(FILE_IN_USE_MESSAGE) from None
+            time.sleep(delay)
+
+
+def remove_tree(path: Path) -> None:
+    """Delete a folder, reporting a locked file as in use rather than failing midway silently."""
+    for child in path.iterdir():
+        if child.is_dir() and not child.is_symlink():
+            try:
+                shutil.rmtree(child)
+            except PermissionError as exc:
+                raise MediaInUseError(FILE_IN_USE_MESSAGE) from exc
+        else:
+            remove_file(child)
+    path.rmdir()
 
 
 class MediaStore:
@@ -282,13 +316,13 @@ class MediaStore:
             (self.conversion_jobs_dir / f"{conversion_id}.json", self.conversion_jobs_dir),
         ):
             try:
-                self._existing_contained_file(path, root, "Conversion file").unlink()
+                remove_file(self._existing_contained_file(path, root, "Conversion file"))
             except FileNotFoundError:
                 pass
 
     def _delete_uploaded(self, media_path: Path, media_dir: Path) -> None:
         # media_path is already resolved inside media_dir; its stem is the upload UUID.
-        media_path.unlink()
+        remove_file(media_path)
         (media_dir / f"{media_path.stem}.json").unlink(missing_ok=True)
 
     @staticmethod

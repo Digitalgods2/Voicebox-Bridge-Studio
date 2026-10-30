@@ -22,7 +22,7 @@ from uuid import UUID, uuid4
 import wave
 
 from .audio_effects import AudioEffectsProcessor, validate_audio_adjustments
-from .media_store import MediaInUseError
+from .media_store import MediaInUseError, remove_file, remove_tree
 from .youtube_cache import YouTubeCacheError, YouTubeSourceCache
 
 
@@ -957,7 +957,20 @@ class YouTubeJobService:
             job_dir = self._job_dir(job_id)
             if job_dir.parent != self.jobs_dir.resolve() or job_dir.is_symlink():
                 raise ValueError("Video job folder is outside the jobs directory")
-            shutil.rmtree(job_dir)
+            # The output is what a player may still hold open, so remove it first,
+            # and the manifest last: a failed delete leaves a complete, retryable job.
+            manifest_path = job_dir / "manifest.json"
+            for output in sorted(job_dir.glob("output.*")):
+                remove_file(output)
+            for child in job_dir.iterdir():
+                if child == manifest_path:
+                    continue
+                if child.is_dir() and not child.is_symlink():
+                    remove_tree(child)
+                else:
+                    remove_file(child)
+            remove_file(manifest_path)
+            job_dir.rmdir()
 
     def resolve_output(self, job_id: str) -> Path:
         job_id = _uuid(job_id, "job_id")

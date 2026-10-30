@@ -489,6 +489,37 @@ function DeleteResultButton(props: { what: string; onConfirm: () => void; pendin
   );
 }
 
+/**
+ * Stops and unloads every player showing a file whose URL contains `id`.
+ * Windows can't delete a file the app is still streaming to a player.
+ * Returns a function that reloads those players if the deletion fails.
+ */
+function releasePlayers(id: string): () => void {
+  const released: Array<[HTMLMediaElement, string]> = [];
+  for (const player of document.querySelectorAll<HTMLMediaElement>('audio, video')) {
+    const src = player.getAttribute('src') ?? '';
+    if (!src.includes(id)) continue;
+    player.pause();
+    player.removeAttribute('src');
+    player.load();
+    released.push([player, src]);
+  }
+  return () => {
+    for (const [player, src] of released) player.setAttribute('src', src);
+  };
+}
+
+/** Removes a file the page may be playing, restoring the players if removal fails. */
+async function removeReleasingPlayers(id: string, remove: (id: string) => Promise<unknown>) {
+  const restore = releasePlayers(id);
+  try {
+    await remove(id);
+  } catch (error) {
+    restore();
+    throw error;
+  }
+}
+
 /** Upload state for one source kind, with clearing and replacement cleanup. */
 function useSourceUpload(
   upload: (file: File) => Promise<STSUpload>,
@@ -514,7 +545,7 @@ function useSourceUpload(
   const clearMutation = useMutation({
     mutationFn: async () => {
       const id = current && idOf(current);
-      if (id) await remove(id);
+      if (id) await removeReleasingPlayers(id, remove);
     },
     onSuccess: () => {
       setCurrent(null);
@@ -536,7 +567,8 @@ function useDeleteResult(
   const notifyFailure = useFailureToast('Could not delete the result');
   return useMutation({
     mutationFn: async () => {
-      if (jobId) await remove(jobId);
+      // Result URLs contain the job ID: /sts/audio/jobs/{id}/audio and /sts/media/video-jobs/{id}.
+      if (jobId) await removeReleasingPlayers(jobId, remove);
     },
     onSuccess: () => {
       queryClient.removeQueries({ queryKey: ['sts', 'audio-job', jobId] });

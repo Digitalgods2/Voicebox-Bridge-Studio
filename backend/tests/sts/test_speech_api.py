@@ -217,3 +217,47 @@ def test_delete_video_job_keeps_other_media(endpoint, tmp_path):
     assert (cache / "source.mp4").is_file()
     assert request(f"/sts/video/jobs/{finished}", method="DELETE")[0] == 404
     assert request("/sts/video/jobs/../../profiles", method="DELETE")[0] in {404, 422}
+
+
+def _locked_video_job(tmp_path, monkeypatch, lock_attempts):
+    """A finished video job whose output is locked (as on Windows while a player streams it)."""
+    import json
+    from pathlib import Path
+
+    from backend.sts import media_store
+
+    job_id = str(uuid4())
+    job_dir = tmp_path / "video_jobs" / job_id
+    job_dir.mkdir(parents=True)
+    (job_dir / "manifest.json").write_text(json.dumps({"job_id": job_id, "status": "completed"}))
+    (job_dir / "output.mp4").write_bytes(b"video")
+    (job_dir / "source.wav").write_bytes(b"audio")
+    real_unlink = Path.unlink
+    remaining = {"locks": lock_attempts}
+
+    def unlink(self, missing_ok=False):
+        if self.name == "output.mp4" and remaining["locks"] > 0:
+            remaining["locks"] -= 1
+            raise PermissionError(32, "The process cannot access the file because it is being used by another process")
+        return real_unlink(self, missing_ok=missing_ok)
+
+    monkeypatch.setattr(Path, "unlink", unlink)
+    monkeypatch.setattr(media_store.time, "sleep", lambda _: None)
+    return job_id, job_dir
+
+
+def test_video_delete_waits_for_a_briefly_locked_output(endpoint, tmp_path, monkeypatch):
+    request, *_ = endpoint
+    job_id, job_dir = _locked_video_job(tmp_path, monkeypatch, lock_attempts=3)
+    assert request(f"/sts/video/jobs/{job_id}", method="DELETE")[2] == {"deleted": True}
+    assert not job_dir.exists()
+
+
+def test_video_delete_of_a_file_still_in_use_is_retryable(endpoint, tmp_path, monkeypatch):
+    request, *_ = endpoint
+    job_id, job_dir = _locked_video_job(tmp_path, monkeypatch, lock_attempts=10_000)
+    code, _, body = request(f"/sts/video/jobs/{job_id}", method="DELETE")
+    assert code == 409 and "still open" in body["detail"]
+    # Nothing was removed, so the job is still listed and can be deleted later.
+    assert (job_dir / "manifest.json").is_file() and (job_dir / "source.wav").is_file()
+    assert request(f"/sts/video/jobs/{job_id}")[0] == 200

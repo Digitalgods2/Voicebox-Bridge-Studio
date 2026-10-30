@@ -219,7 +219,7 @@ function MainApp() {
           clearInterval(pollInterval);
           serverStartingRef.current = false;
           setStartupError(
-            'Could not connect to a Voicebox server within 2 minutes. ' +
+            'Could not connect to the VoiceBox Bridge Studio server within 2 minutes. ' +
               'Please check that the server is running and try again.',
           );
         }, 120_000);

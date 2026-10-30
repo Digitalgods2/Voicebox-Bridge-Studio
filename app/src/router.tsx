@@ -5,9 +5,11 @@ import {
   Outlet,
   redirect,
 } from '@tanstack/react-router';
+import { useCallback, useState } from 'react';
 import { AppFrame } from '@/components/AppFrame/AppFrame';
 import { CapturesTab } from '@/components/CapturesTab/CapturesTab';
 import { EffectsTab } from '@/components/EffectsTab/EffectsTab';
+import { LaunchScreen, launchScreenSeen } from '@/components/LaunchScreen/LaunchScreen';
 import { MainEditor } from '@/components/MainEditor/MainEditor';
 import { ModelsTab } from '@/components/ModelsTab/ModelsTab';
 import { AboutPage } from '@/components/ServerTab/AboutPage';
@@ -39,8 +41,13 @@ function RootLayout() {
   // Subscribe to SSE for pending generations — handles completion, auto-play, and history refresh
   useGenerationProgress();
 
+  // Title card on launch; a page refresh in the same tab skips it.
+  const [showLaunchScreen, setShowLaunchScreen] = useState(() => !launchScreenSeen());
+  const closeLaunchScreen = useCallback(() => setShowLaunchScreen(false), []);
+
   return (
     <AppFrame>
+      {showLaunchScreen && <LaunchScreen onContinue={closeLaunchScreen} />}
       <div className="flex flex-1 min-h-0 overflow-hidden">
         <Sidebar isMacOS={isMacOS()} />
 

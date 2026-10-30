@@ -1,5 +1,8 @@
 # Notices and credits
 
+VoiceBox Bridge Studio is created and maintained by **DigitalGods**
+(<https://github.com/Digitalgods2>), who is responsible for this app.
+
 VoiceBox Bridge Studio is built on **VoiceBox** by Jamie Pine and the Voicebox
 contributors: <https://github.com/jamiepine/voicebox>. VoiceBox's source was
 imported from commit `8af7efe62fab8d33e2a5dfbedabaa45f68a5184f` (version 0.6.0)

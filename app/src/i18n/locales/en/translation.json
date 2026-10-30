@@ -1221,13 +1221,13 @@
       "tagline": "A local voice studio. Clone voices, generate speech, convert recordings and videos into any of your voices, and apply effects — all running on your machine.",
       "createdBy": "Created by",
       "builtWith": "Built with",
-      "basedOn": "Built on",
-      "upstreamAuthors": "VoiceBox is by",
-      "andContributors": "and contributors",
+      "projectSource": "Project on GitHub",
+      "foundationHeading": "Built on",
+      "by": "by",
+      "voiceboxRole": "The foundation: text-to-speech, voice cloning, stories, captures, and the app this studio grew from.",
+      "openvoiceRole": "Voice conversion engine behind the Voice Changer.",
       "buyCoffee": "Buy me a coffee",
-      "supportUpstream": "Support VoiceBox",
-      "upstreamSource": "VoiceBox source",
-      "license": "MIT licensed. Includes VoiceBox, © Voicebox Contributors, under the <link>MIT License</link>."
+      "license": "© 2026 DigitalGods. Includes VoiceBox © Voicebox Contributors and OpenVoice © MyShell.ai, both under the MIT License. <link>Notices</link>"
     }
   },
   "models": {

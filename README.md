@@ -157,6 +157,7 @@ disconnected. See [SECURITY.md](SECURITY.md) for how to wire up your own.
 
 ## Credits
 
+- **[DigitalGods](https://github.com/Digitalgods2)**: creator and maintainer of VoiceBox Bridge Studio
 - [Jamie Pine and the VoiceBox contributors](https://github.com/jamiepine/voicebox): the app this is built on
 - [MyShell AI / OpenVoice](https://github.com/myshell-ai/OpenVoice): voice conversion
 - [yt-dlp](https://github.com/yt-dlp/yt-dlp) and [FFmpeg](https://ffmpeg.org/)

@@ -21,6 +21,7 @@ Long local and YouTube video conversions are a primary use case. There must be n
 - VoiceBox source imported from https://github.com/jamiepine/voicebox at commit `8af7efe62fab8d33e2a5dfbedabaa45f68a5184f` (0.6.0) in one commit on 2026-10-30. Upstream's release-signing workflow, maintainer agent skills, and `.mcp.json` were not imported.
 - The pre-merge standalone bridge is preserved on branch `backup/main-pre-voicebox-merge`.
 - Product name "VoiceBridge Studio", Tauri identifier `com.digitalgods.voicebridge`, main binary `voicebridge-studio`. The Rust auto-paste self-detection constants in `tauri/src-tauri/src/main.rs` must stay in sync with these.
+- The logo is the user's own artwork, `branding/logo-source.png`. `scripts/make_app_icon.py` cuts out its white background (including enclosed pockets listed in `ENCLOSED_BACKGROUND_SEEDS` and the drop shadow) and writes the in-app logo, favicons, and `tauri/app-icon.png`; then `cd tauri && bunx tauri icon app-icon.png` and `launcher\build.bat` refresh the platform icons and the launcher exe.
 - Protocol and file identifiers stay upstream-compatible: `X-Voicebox-Client-Id`, `VOICEBOX_*` env vars, `voicebox_speak` MCP tool, `.voicebox.zip` profile exports, and the `voicebox.db` filename.
 - Auto-update is disabled (`UPDATE_FEED_CONFIGURED` in `tauri/src/platform/updater.ts`, empty `plugins.updater.endpoints`). Never point it at upstream's feed.
 

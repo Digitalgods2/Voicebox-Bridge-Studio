@@ -1,74 +1,112 @@
-"""Generate the VoiceBridge Studio icon artwork.
+"""Generate every VoiceBridge Studio logo and icon from branding/logo-source.png.
 
-Writes the 1024px desktop icon source and the in-app logo. Regenerate every
-platform icon from the source with:
+The source artwork sits on a plain white background. Only the white that is
+connected to the image border is removed, so enclosed whites (the filmstrip's
+sprocket holes, highlights) stay opaque. The result is cropped to the artwork
+and centered on a transparent square.
 
     python scripts/make_app_icon.py
     cd tauri && bunx tauri icon app-icon.png
+
+Requires Pillow and NumPy (both are in backend/venv).
 """
 
 from __future__ import annotations
 
+from collections import deque
 from pathlib import Path
 
-from PIL import Image, ImageDraw
+import numpy as np
+from PIL import Image, ImageFilter
 
 ROOT = Path(__file__).resolve().parents[1]
+SOURCE = ROOT / "branding" / "logo-source.png"
 OUT_ICON_SOURCE = ROOT / "tauri" / "app-icon.png"
 OUT_APP_LOGO = ROOT / "app" / "src" / "assets" / "app-logo.png"
+OUT_FAVICONS = (ROOT / "web" / "public" / "favicon.png", ROOT / "app" / "public" / "favicon.png")
 
-BG_TOP = (30, 41, 59)      # slate-800
-BG_BOTTOM = (15, 23, 42)   # slate-900
-BAR_COLOR = (56, 189, 248)  # sky-400
-BAR_COLOR_DIM = (14, 116, 144)  # cyan-800
+# A pixel is background when every channel is at least this bright and it is
+# reachable from the border through other background pixels.
+BACKGROUND_MIN = 232
+PADDING = 0.03
 
 
-def render(size: int) -> Image.Image:
-    img = Image.new("RGBA", (size, size), (0, 0, 0, 0))
-    draw = ImageDraw.Draw(img)
+# Drop shadows on the white background are near-neutral (channel spread up to
+# about 30 where they darken into a brown tint); the gold artwork spreads 50+.
+SHADOW_MAX_SPREAD = 30
+SHADOW_MIN = 120
+# Background visible through closed loops in the artwork (the filmstrip's
+# upper-left loop) is not connected to the border, so it is seeded explicitly.
+# Source-image (x, y) coordinates; update these if the artwork changes.
+ENCLOSED_BACKGROUND_SEEDS = ((205, 455),)
+# Width in source pixels of the anti-aliased edge cleaned around the background.
+EDGE_BAND = 3
 
-    # Rounded-square background with a vertical gradient.
-    for y in range(size):
-        t = y / max(size - 1, 1)
-        color = tuple(int(BG_TOP[i] + (BG_BOTTOM[i] - BG_TOP[i]) * t) for i in range(3))
-        draw.line([(0, y), (size, y)], fill=color + (255,))
 
-    mask = Image.new("L", (size, size), 0)
-    mask_draw = ImageDraw.Draw(mask)
-    radius = int(size * 0.22)
-    mask_draw.rounded_rectangle([0, 0, size - 1, size - 1], radius=radius, fill=255)
-    rounded = Image.new("RGBA", (size, size), (0, 0, 0, 0))
-    rounded.paste(img, (0, 0), mask)
-    img = rounded
-    draw = ImageDraw.Draw(img)
+def flood(allowed: np.ndarray, seeds: np.ndarray) -> np.ndarray:
+    """Pixels in ``allowed`` reachable from ``seeds`` through 4-connected neighbors."""
+    height, width = allowed.shape
+    reached = np.zeros_like(allowed)
+    queue = deque(zip(*np.nonzero(seeds & allowed), strict=True))
+    while queue:
+        y, x = queue.popleft()
+        if reached[y, x]:
+            continue
+        reached[y, x] = True
+        for ny, nx in ((y - 1, x), (y + 1, x), (y, x - 1), (y, x + 1)):
+            if 0 <= ny < height and 0 <= nx < width and allowed[ny, nx] and not reached[ny, nx]:
+                queue.append((ny, nx))
+    return reached
 
-    # Waveform / audio-bridge glyph: symmetric bars of varying height.
-    bar_count = 7
-    margin = size * 0.22
-    usable_w = size - 2 * margin
-    gap = usable_w * 0.18 / bar_count
-    bar_w = (usable_w - gap * (bar_count - 1)) / bar_count
-    heights = [0.35, 0.55, 0.85, 1.0, 0.85, 0.55, 0.35]
-    center_y = size / 2
 
-    for i, h in enumerate(heights):
-        x0 = margin + i * (bar_w + gap)
-        x1 = x0 + bar_w
-        bar_h = h * size * 0.6
-        y0 = center_y - bar_h / 2
-        y1 = center_y + bar_h / 2
-        color = BAR_COLOR if i in (2, 3, 4) else BAR_COLOR_DIM
-        r = bar_w / 2
-        draw.rounded_rectangle([x0, y0, x1, y1], radius=r, fill=color + (255,))
+def cut_out(source: Image.Image) -> Image.Image:
+    rgb = np.asarray(source.convert("RGB")).astype(np.int16)
+    border = np.zeros(rgb.shape[:2], dtype=bool)
+    border[[0, -1], :] = border[:, [0, -1]] = True
+    for x, y in ENCLOSED_BACKGROUND_SEEDS:
+        border[y, x] = True
+    background = flood(rgb.min(axis=2) >= BACKGROUND_MIN, border)
+    # Shadows cast on the background: neutral light grays connected to it.
+    neutral = (rgb.max(axis=2) - rgb.min(axis=2) <= SHADOW_MAX_SPREAD) & (rgb.min(axis=2) >= SHADOW_MIN)
+    shadow = flood(neutral | background, background) & ~background
 
-    return img
+    # Shadows become translucent black so they read on light and dark surfaces.
+    alpha = np.full(rgb.shape[:2], 255.0)
+    pixels = rgb.astype(np.float64)
+    alpha[shadow] = 255 - rgb[shadow].mean(axis=1)
+    pixels[shadow] = 0
+    alpha[background] = 0
+
+    # Edge pixels are artwork blended with the white background. "Color to
+    # alpha" against white recovers the artwork color and its coverage, so no
+    # pale fringe shows on dark surfaces.
+    cleared = Image.fromarray(np.where(background | shadow, 255, 0).astype(np.uint8))
+    band = np.asarray(cleared.filter(ImageFilter.MaxFilter(2 * EDGE_BAND + 1))) > 0
+    band &= ~(background | shadow)
+    edge = rgb[band].astype(np.float64)
+    coverage = np.clip((255 - edge).max(axis=1) / 255, 1 / 255, 1)
+    pixels[band] = 255 - (255 - edge) / coverage[:, None]
+    alpha[band] = coverage * 255
+    rgba = np.dstack([np.clip(pixels, 0, 255), alpha]).round().astype(np.uint8)
+    return Image.fromarray(rgba, "RGBA")
+
+
+def square(image: Image.Image) -> Image.Image:
+    box = image.getchannel("A").point(lambda value: 255 if value > 8 else 0).getbbox()
+    art = image.crop(box)
+    side = round(max(art.size) * (1 + 2 * PADDING))
+    canvas = Image.new("RGBA", (side, side), (0, 0, 0, 0))
+    canvas.paste(art, ((side - art.width) // 2, (side - art.height) // 2), art)
+    return canvas
 
 
 def main() -> None:
-    render(1024).save(OUT_ICON_SOURCE)
-    print(f"Wrote {OUT_ICON_SOURCE}")
-    render(256).save(OUT_APP_LOGO)
-    print(f"Wrote {OUT_APP_LOGO}")
+    logo = square(cut_out(Image.open(SOURCE)))
+    outputs = [(OUT_ICON_SOURCE, 1024), (OUT_APP_LOGO, 256)] + [(path, 64) for path in OUT_FAVICONS]
+    for path, size in outputs:
+        path.parent.mkdir(parents=True, exist_ok=True)
+        logo.resize((size, size), Image.Resampling.LANCZOS).save(path, optimize=True)
+        print(f"Wrote {path.relative_to(ROOT)} ({size}px)")
 
 
 if __name__ == "__main__":

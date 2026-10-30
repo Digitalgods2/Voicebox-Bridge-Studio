@@ -94,15 +94,25 @@ flowchart LR
    backend\venv\Scripts\python scripts\import_voicebox_data.py
    ```
 
+   The import also keeps the old app's voice effects: a voice with a pitch
+   effect starts the Voice Changer at that pitch. Keep a separate safety copy
+   in `data\backups\` if you plan to uninstall the old VoiceBox app.
+
 TTS model weights are shared through the Hugging Face cache, so models already
 downloaded by VoiceBox are reused rather than downloaded again.
 
 ## Run
 
-Double-click [`start-app.bat`](start-app.bat). It builds the web UI on first
-run, starts the backend on `http://127.0.0.1:17493` with this folder's `data\`
-workspace, and opens your browser. Close the standalone VoiceBox app first; both
-use port 17493. Set `APP_PORT` to use a different port.
+Double-click **`VoiceBridgeStudio.exe`** in the project folder (build it once
+with `launcher\build.bat`). It starts the one merged program on
+`http://127.0.0.1:17493` with this folder's `data\` workspace, opens your
+browser, and shows a tray icon with **Open**, **View Logs**, and **Quit**.
+There is no console window; Quit stops everything. It builds the web UI on
+first run, and if the separately installed VoiceBox app is holding the port it
+offers to close it. Logs go to `data\logs\app.log`.
+
+[`start-app.bat`](start-app.bat) does the same in a console window. Set
+`APP_PORT` to use a different port with either.
 
 For development with hot reload:
 

@@ -31,7 +31,9 @@ Long local and YouTube video conversions are a primary use case. There must be n
 - `backend/routes/sts.py`: `/sts` router. A lazily built process-wide `STSRuntime` shares one conversion lock across audio, local-video, and YouTube jobs; `run_sts_startup()` runs from the app lifespan.
 - STS data shares the workspace data dir with the voice library: `inputs/`, `outputs/`, `jobs/`, `audio_jobs/`, `video_inputs/`, `video_jobs/`, `youtube_cache/`, plus `models/openvoice-v2/`.
 - `app/src/components/VoiceChangerTab/` + `app/src/lib/api/sts.ts`: the Voice Changer UI at route `/voice-changer`.
-- `start-app.bat` serves `web/dist` from the backend with `--data-dir data`. `scripts/import_voicebox_data.py` copies an installed VoiceBox library (`%APPDATA%\sh.voicebox.app`) into the workspace, read-only on the source.
+- `VoiceBridgeStudio.exe` (built by `launcher/build.bat` from `launcher/launcher.py`, ignored by git) is the everyday launcher: a small windowed tray app that runs `backend.main` from `backend/venv` inside a kill-on-close job object and offers to close the standalone VoiceBox if it holds the port. `start-app.bat` is the console equivalent. Both serve `web/dist` from the backend with `--data-dir data`.
+- The pre-merge `VoiceBoxBridge.exe` was a frozen copy of the old bridge that started the installed VoiceBox; it was deleted. Never revive it.
+- The user's voices came from the installed VoiceBox library and were imported byte-identical into `data/`; a verified backup zip is in `data/backups/`. Never delete either copy. `scripts/import_voicebox_data.py` copies an installed VoiceBox library (`%APPDATA%\sh.voicebox.app`) into the workspace, read-only on the source.
 
 VoiceBox profiles are not RVC models: a cloned profile is metadata plus reference WAVs and transcripts; shared Qwen/Chatterbox/LuxTTS/TADA weights are engine-level models. Do not use Whisper -> text -> TTS for conversion; it loses timing, delivery, and emotion. Preset and designed profiles have no samples and cannot be used for STS yet; generating and caching a neutral reference through TTS is the planned approach.
 
@@ -54,7 +56,9 @@ OpenVoice V2 (MIT) is the installed engine; see `docs/sts/engine-audit.md`. Seed
 
 - Merge complete on branch `voicebox-merge`. STS tests pass (80) in a lightweight Python 3.12 env; frontend typecheck, Biome, and the production web build pass.
 - A real GPU conversion through `/sts/audio/jobs` using imported workspace profiles completed with exact source duration and was fully decoded.
-- The full backend (torch and TTS engines) has not yet been installed in `backend/venv`, so the complete app has not been launched end to end. The Tauri desktop build has not been compiled.
+- The full backend is installed in `backend/venv` (`just setup-python`, CUDA torch). The merged app was launched through `VoiceBridgeStudio.exe`: one server on 17493 served the UI, the 9 imported voices through both `/profiles` and `/sts/voices`, and a live STS job with exact duration.
+- No TTS model weights are present: the user's Hugging Face cache had been cleared before the merge (only lock folders remained). They must be re-downloaded from the Models tab, with the user's approval of each size.
+- The Tauri desktop build has not been compiled.
 - Automatic continuation of interrupted jobs after a process exit remains future work.
 
 See `README.md`, `NOTICE.md`, `docs/sts/api.md`, `docs/sts/engine-install.md`, `docs/sts/engine-audit.md`, and `docs/sts/validation.md`.

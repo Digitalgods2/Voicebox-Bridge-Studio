@@ -12,6 +12,8 @@ export interface STSVoice {
   language: string;
   voice_type: string;
   sample_count: number;
+  /** The voice's enabled pitch-shift effect, used until adjustments are saved for it. */
+  default_pitch_semitones: number;
 }
 
 export interface STSSample {

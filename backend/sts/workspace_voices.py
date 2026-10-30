@@ -7,6 +7,8 @@ sample files the TTS features use, with no HTTP hop and no cached copies.
 
 from __future__ import annotations
 
+import json
+import math
 import wave
 from collections.abc import Callable
 from contextlib import closing
@@ -50,6 +52,28 @@ def inspect_wav(path: Path) -> dict[str, Any]:
         # Some valid WAVE files use codecs unsupported by Python's wave module.
         details["pcm_details_available"] = False
     return details
+
+
+def default_pitch_semitones(effects_chain: str | None) -> float:
+    """The voice's enabled pitch-shift effect, clamped to the STS range; 0 if none.
+
+    A voice tuned with a pitch effect for TTS starts the voice changer at the
+    same pitch, as the pre-merge bridge did.
+    """
+    try:
+        effects = json.loads(effects_chain) if effects_chain else []
+    except (TypeError, ValueError):
+        return 0.0
+    for effect in effects if isinstance(effects, list) else []:
+        if not isinstance(effect, dict) or effect.get("type") != "pitch_shift" or effect.get("enabled") is False:
+            continue
+        try:
+            semitones = float((effect.get("params") or {}).get("semitones"))
+        except (TypeError, ValueError):
+            continue
+        if math.isfinite(semitones):
+            return max(-6.0, min(6.0, semitones))
+    return 0.0
 
 
 def _default_session() -> Any:
@@ -167,4 +191,5 @@ class WorkspaceVoices:
             "language": row.language,
             "voice_type": row.voice_type or "cloned",
             "sample_count": sample_count,
+            "default_pitch_semitones": default_pitch_semitones(row.effects_chain),
         }

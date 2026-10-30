@@ -54,12 +54,14 @@ const STAGE_LABELS: Record<string, string> = {
   failed: 'Failed',
 };
 
-function loadAdjustments(profileId: string): STSAdjustments {
+function loadAdjustments(profileId: string, defaultPitch: number): STSAdjustments {
+  // A voice starts at the pitch of its own pitch-shift effect until you save adjustments for it.
+  const defaults = { ...DEFAULT_ADJUSTMENTS, pitch_semitones: defaultPitch };
   try {
     const saved = JSON.parse(localStorage.getItem(ADJUSTMENTS_KEY) ?? '{}');
-    return { ...DEFAULT_ADJUSTMENTS, ...(saved[profileId] ?? {}) };
+    return { ...defaults, ...(saved[profileId] ?? {}) };
   } catch {
-    return DEFAULT_ADJUSTMENTS;
+    return defaults;
   }
 }
 
@@ -101,9 +103,11 @@ export function VoiceChangerTab() {
     setSampleId(list.length === 1 ? list[0].id : '');
   }, [samples.data]);
 
+  const defaultPitch =
+    voices.data?.find((voice) => voice.id === profileId)?.default_pitch_semitones ?? 0;
   useEffect(() => {
-    if (profileId) setAdjustments(loadAdjustments(profileId));
-  }, [profileId]);
+    if (profileId) setAdjustments(loadAdjustments(profileId, defaultPitch));
+  }, [profileId, defaultPitch]);
 
   const updateAdjustment = (key: keyof STSAdjustments, value: number) => {
     const next = { ...adjustments, [key]: value };

@@ -27,7 +27,7 @@ if "%PORT_STATE%"=="11" (
 )
 
 if not exist "%APP_PYTHON%" goto missing_python
-"%APP_PYTHON%" -c "import fastapi, uvicorn, sqlalchemy, torch, yt_dlp" >nul 2>&1
+"%APP_PYTHON%" -c "import torch, yt_dlp, backend.app" >nul 2>&1
 if errorlevel 1 goto missing_python
 
 if not exist "%CD%\web\dist\index.html" (
@@ -61,10 +61,10 @@ exit /b %APP_EXIT%
 
 :missing_python
 echo.
-echo The backend Python environment is missing or incomplete.
-echo It needs Python 3.12 plus PyTorch and the TTS engines - a multi-gigabyte
-echo download. From this folder, run:
+echo The backend environment is not finished installing.
+echo If "just setup-python" is still running, wait for it to finish and try again.
+echo Otherwise, from this folder, run:
 echo   just setup-python
-echo See README.md for details.
+echo It installs PyTorch and the TTS engines - a multi-gigabyte download.
 pause
 exit /b 1

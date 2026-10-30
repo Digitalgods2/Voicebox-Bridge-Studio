@@ -9,7 +9,12 @@ from sqlalchemy.orm import sessionmaker
 
 from backend import config
 from backend.database import Base, ProfileSample, VoiceProfile
-from backend.sts.workspace_voices import VoiceWorkspaceError, WorkspaceVoices, inspect_wav
+from backend.sts.workspace_voices import (
+    VoiceWorkspaceError,
+    WorkspaceVoices,
+    default_pitch_semitones,
+    inspect_wav,
+)
 
 
 def write_wav(path: Path, frames: int = 16_000) -> Path:
@@ -72,6 +77,22 @@ class WorkspaceVoicesTests(unittest.TestCase):
         self.assertEqual(profiles["Preset"]["sample_count"], 0)
         self.assertEqual(profiles["Preset"]["voice_type"], "preset")
         self.assertEqual(self.voices.health()["profiles"], 2)
+
+    def test_voice_pitch_effect_becomes_the_default_pitch(self) -> None:
+        chain = '[{"type": "pitch_shift", "enabled": true, "params": {"semitones": -2}}, {"type": "lowpass"}]'
+        self.assertEqual(default_pitch_semitones(chain), -2.0)
+        self.assertEqual(default_pitch_semitones('[{"type": "pitch_shift", "params": {"semitones": 9}}]'), 6.0)
+        self.assertEqual(
+            default_pitch_semitones('[{"type": "pitch_shift", "enabled": false, "params": {"semitones": 3}}]'), 0.0
+        )
+        self.assertEqual(default_pitch_semitones("not json"), 0.0)
+        self.assertEqual(default_pitch_semitones(None), 0.0)
+        with self.sessions() as db:
+            db.query(VoiceProfile).filter_by(id=self.profile_id).update({"effects_chain": chain})
+            db.commit()
+        profiles = {profile["name"]: profile for profile in self.voices.profiles()}
+        self.assertEqual(profiles["Narrator"]["default_pitch_semitones"], -2.0)
+        self.assertEqual(profiles["Preset"]["default_pitch_semitones"], 0.0)
 
     def test_lists_samples_with_workspace_audio_urls(self) -> None:
         samples = self.voices.samples(self.profile_id)

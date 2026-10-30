@@ -4,3 +4,5 @@
 *.md text eol=lf
 *.py text eol=lf
 *.toml text eol=lf
+package.json text eol=lf
+scripts/*.sh text eol=lf

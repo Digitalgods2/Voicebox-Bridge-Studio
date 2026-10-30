@@ -1,21 +1,59 @@
-.venv/
-.envs/
-.cache/
+# Dependencies
+node_modules/
+bun.lockb
+
+# Python
 __pycache__/
 *.py[cod]
+*$py.class
+*.so
+.Python
+.venv/
+venv/
+env/
+ENV/
+.envs/
+.cache/
 *.egg-info/
+*.egg
 .pytest_cache/
-.playwright-cli/
 .coverage
-output/
-build/
+*.prompt
+
+# Build outputs
 dist/
+build/
+output/
+target/
+*.app
+*.dmg
+*.exe
+*.msi
+*.deb
+*.AppImage
+# PyInstaller
 *.spec
-/VoiceBoxBridge.exe
+
+# IDE / local assistant settings
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
 .codex/
-.agents/
+.playwright-cli/
+.claude/settings.local.json
 AGENTS.local.md
+
+# OS
+.DS_Store
+Thumbs.db
+# Windows artifacts
+nul
+
+# Logs
 *.log
+logs/
 
 # Never commit credentials or host-local configuration.
 .env
@@ -28,9 +66,30 @@ AGENTS.local.md
 credentials.*
 secrets.*
 
-# Runtime artifacts stay local.
+# Runtime data (profiles, generations, STS jobs, model weights) stays local.
 data/*
 !data/.gitkeep
+!data/cache/
+data/cache/*
+!data/cache/.gitkeep
 
-# Audited third-party engines are kept isolated from bridge code.
+# Audited third-party engines are kept isolated from application code.
 third_party/
+
+# Generated files
+app/openapi.json
+tauri/src-tauri/binaries/*
+tauri/src-tauri/gen/Assets.car
+tauri/src-tauri/gen/voicebox.icns
+tauri/src-tauri/gen/partial.plist
+tauri/src-tauri/gen/schemas/linux-schema.json
+
+# Temporary
+tmp/
+temp/
+*.tmp
+
+# E2E test artifacts
+backend/tests/results/
+backend/tests/fixtures/reference_voice.wav
+backend/tests/fixtures/reference_voice.txt

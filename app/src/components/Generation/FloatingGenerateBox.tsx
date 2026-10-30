@@ -281,7 +281,7 @@ export function FloatingGenerateBox({
       }}
     >
       <motion.div
-        className="bg-background/30 backdrop-blur-2xl border border-accent/20 rounded-[2rem] shadow-2xl hover:bg-background/40 hover:border-accent/20 transition-all duration-300 p-3"
+        className="bg-card/85 backdrop-blur-2xl border border-accent/35 rounded-[2rem] shadow-[0_18px_50px_-18px_rgba(0,0,0,0.85)] hover:border-accent/50 focus-within:border-accent/60 transition-all duration-300 p-3"
         transition={{ duration: 0.6, ease: 'easeInOut' }}
       >
         <Form {...form}>
@@ -342,7 +342,7 @@ export function FloatingGenerateBox({
                                       })
                                     : t('generation.placeholder.selectVoice')
                               }
-                              className="resize-none bg-transparent border-none focus-visible:ring-0 focus-visible:ring-offset-0 focus:outline-none focus:ring-0 outline-none ring-0 rounded-2xl text-sm placeholder:text-muted-foreground/60 w-full"
+                              className="resize-none bg-transparent border-none focus-visible:ring-0 focus-visible:ring-offset-0 focus:outline-none focus:ring-0 outline-none ring-0 rounded-2xl text-sm text-foreground placeholder:text-[hsl(var(--placeholder))] w-full"
                               style={{
                                 minHeight: isExpanded ? '100px' : '32px',
                                 maxHeight: '300px',
@@ -390,7 +390,7 @@ export function FloatingGenerateBox({
                             <Dices className="h-4 w-4" />
                           )}
                         </Button>
-                        <span className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-2 whitespace-nowrap rounded-md bg-popover px-3 py-1.5 text-xs text-popover-foreground border border-border opacity-0 transition-opacity group-hover:opacity-100 z-[9999]">
+                        <span className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-2 whitespace-nowrap rounded-md bg-popover px-3 py-1.5 text-xs text-popover-foreground border border-accent/25 opacity-0 transition-opacity group-hover:opacity-100 z-[9999]">
                           {t('generation.compose.tooltip')}
                         </span>
                       </div>
@@ -436,7 +436,7 @@ export function FloatingGenerateBox({
                                   >
                                     <Wand2 className="h-4 w-4" />
                                   </Button>
-                                  <span className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-2 whitespace-nowrap rounded-md bg-popover px-3 py-1.5 text-xs text-popover-foreground border border-border opacity-0 transition-opacity group-hover:opacity-100 z-[9999]">
+                                  <span className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-2 whitespace-nowrap rounded-md bg-popover px-3 py-1.5 text-xs text-popover-foreground border border-accent/25 opacity-0 transition-opacity group-hover:opacity-100 z-[9999]">
                                     {active
                                       ? t('generation.persona.tooltipActive')
                                       : t('generation.persona.tooltipInactive')}
@@ -481,7 +481,7 @@ export function FloatingGenerateBox({
                         >
                           <SlidersHorizontal className="h-4 w-4" />
                         </Button>
-                        <span className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-2 whitespace-nowrap rounded-md bg-popover px-3 py-1.5 text-xs text-popover-foreground border border-border opacity-0 transition-opacity group-hover:opacity-100 z-[9999]">
+                        <span className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-2 whitespace-nowrap rounded-md bg-popover px-3 py-1.5 text-xs text-popover-foreground border border-accent/25 opacity-0 transition-opacity group-hover:opacity-100 z-[9999]">
                           {t('generation.instruct.tooltip')}
                         </span>
                       </div>
@@ -493,7 +493,7 @@ export function FloatingGenerateBox({
                   <Button
                     type="submit"
                     disabled={isPending || !selectedProfileId}
-                    className="h-10 w-10 rounded-full bg-accent hover:bg-accent/90 hover:scale-105 text-accent-foreground shadow-lg hover:shadow-accent/50 transition-all duration-200"
+                    className="h-10 w-10 rounded-full gold-fill hover:scale-105 text-accent-foreground transition-all duration-200"
                     size="icon"
                     aria-label={
                       isPending
@@ -509,7 +509,7 @@ export function FloatingGenerateBox({
                       <Sparkles className="h-4 w-4" />
                     )}
                   </Button>
-                  <span className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-2 whitespace-nowrap rounded-md bg-popover px-3 py-1.5 text-xs text-popover-foreground border border-border opacity-0 transition-opacity group-hover:opacity-100 z-[9999]">
+                  <span className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-2 whitespace-nowrap rounded-md bg-popover px-3 py-1.5 text-xs text-popover-foreground border border-accent/25 opacity-0 transition-opacity group-hover:opacity-100 z-[9999]">
                     {isPending
                       ? t('generation.button.generating')
                       : !selectedProfileId
@@ -543,7 +543,7 @@ export function FloatingGenerateBox({
                                 ? t('generation.instruct.placeholderOmnivoice')
                                 : t('generation.instruct.placeholder')
                             }
-                            className="resize-none bg-transparent border border-accent/20 focus-visible:ring-1 focus-visible:ring-accent/40 rounded-2xl text-sm placeholder:text-muted-foreground/60 w-full px-3 py-2"
+                            className="resize-none bg-transparent border border-accent/20 focus-visible:ring-1 focus-visible:ring-accent/40 rounded-2xl text-sm text-foreground placeholder:text-[hsl(var(--placeholder))] w-full px-3 py-2"
                             style={{ minHeight: '60px', maxHeight: '160px' }}
                             maxLength={500}
                           />

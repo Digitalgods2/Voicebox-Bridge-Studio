@@ -267,13 +267,13 @@ export function MCPPage() {
 
       <aside className="hidden lg:block w-[280px] shrink-0 space-y-6 sticky top-0">
         <div className="space-y-2">
-          <h3 className="text-sm font-semibold">{t('settings.mcp.sidebar.aboutTitle')}</h3>
+          <h3 className="brand-label text-xs">{t('settings.mcp.sidebar.aboutTitle')}</h3>
           <p className="text-sm text-muted-foreground leading-relaxed">
             {t('settings.mcp.sidebar.aboutBody')}
           </p>
         </div>
         <div className="space-y-2">
-          <h3 className="text-sm font-semibold">{t('settings.mcp.sidebar.toolsTitle')}</h3>
+          <h3 className="brand-label text-xs">{t('settings.mcp.sidebar.toolsTitle')}</h3>
           <ul className="text-sm text-muted-foreground space-y-1.5 leading-relaxed">
             <li>
               <code className="text-accent">voicebox_speak</code>

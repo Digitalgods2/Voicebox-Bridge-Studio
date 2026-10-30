@@ -57,7 +57,7 @@ export function Sidebar({ isMacOS }: SidebarProps) {
   return (
     <div
       className={cn(
-        'fixed left-0 top-0 h-full w-[var(--sidebar-width)] bg-sidebar border-r border-border flex flex-col items-center py-5 gap-5',
+        'fixed left-0 top-0 h-full w-[var(--sidebar-width)] bg-sidebar border-r border-accent/20 flex flex-col items-center py-5 gap-4',
         isMacOS && 'pt-12',
       )}
     >
@@ -75,53 +75,42 @@ export function Sidebar({ isMacOS }: SidebarProps) {
         </span>
       </Link>
 
-      {/* Navigation Buttons */}
-      <div className="flex flex-col gap-3">
-        {tabs.map((tab, index) => {
+      {/* Navigation: icon tiles with their names, gold for the current screen */}
+      <nav className="flex w-full flex-1 min-h-0 flex-col items-center gap-1.5 overflow-y-auto px-3">
+        {tabs.map((tab) => {
           const Icon = tab.icon;
+          const label = tab.label ?? (tab.labelKey ? t(tab.labelKey) : tab.id);
           const isActive =
             tab.path === '/'
               ? matchRoute({ to: '/', fuzzy: false })
               : matchRoute({ to: tab.path, fuzzy: true });
-
-          // Accent fades as buttons get further from the logo
-          const accentOpacity = Math.max(0.08, 0.5 - index * 0.07);
 
           return (
             <Link
               key={tab.id}
               to={tab.path}
               className={cn(
-                'relative w-12 h-12 rounded-full flex items-center justify-center transition-all duration-200 overflow-hidden',
+                'group flex w-full shrink-0 flex-col items-center justify-center gap-1 rounded-xl border py-2 transition-all duration-200',
                 isActive
-                  ? 'bg-white/[0.07] text-foreground shadow-lg backdrop-blur-sm border border-white/[0.08]'
-                  : 'text-muted-foreground hover:bg-muted/50',
+                  ? 'border-accent/45 bg-accent/12 text-accent shadow-[0_0_18px_-6px_rgba(214,167,79,0.55)]'
+                  : 'border-transparent text-muted-foreground hover:border-accent/20 hover:bg-accent/8 hover:text-foreground',
               )}
-              title={tab.label ?? (tab.labelKey ? t(tab.labelKey) : tab.id)}
-              aria-label={tab.label ?? (tab.labelKey ? t(tab.labelKey) : tab.id)}
+              title={label}
+              aria-current={isActive ? 'page' : undefined}
             >
-              {isActive && (
-                <div
-                  className="absolute inset-0 rounded-full pointer-events-none"
-                  style={{
-                    maskImage: 'linear-gradient(to bottom, black, transparent 60%)',
-                    WebkitMaskImage: 'linear-gradient(to bottom, black, transparent 60%)',
-                    border: `1px solid hsl(var(--accent) / ${accentOpacity})`,
-                  }}
-                />
-              )}
-              <Icon className="h-5 w-5 relative z-10" />
+              <Icon className="h-5 w-5" />
+              <span className="text-[11px] font-medium leading-none">{label}</span>
             </Link>
           );
         })}
-      </div>
+      </nav>
 
       {/* Version */}
       <div
         className="mt-auto flex flex-col items-center gap-1.5 transition-all duration-300"
         style={{ paddingBottom: isPlayerOpen ? '7rem' : undefined }}
       >
-        <span className="text-[10px] text-muted-foreground/50">v{version}</span>
+        <span className="text-[10px] text-muted-foreground/80">v{version}</span>
         {updateStatus.available && (
           <Link
             to="/settings"

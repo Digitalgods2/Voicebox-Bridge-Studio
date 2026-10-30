@@ -142,7 +142,7 @@ export function AudioTab() {
   return (
     <div className="h-full flex flex-col">
       <div className="flex items-center justify-between mb-6 shrink-0">
-        <h2 className="text-2xl font-bold">{t('audioChannels.title')}</h2>
+        <h2 className="brand-title text-3xl leading-tight">{t('audioChannels.title')}</h2>
         <Button onClick={() => setCreateDialogOpen(true)}>
           <Plus className="h-4 w-4 mr-2" />
           {t('audioChannels.newChannel')}
@@ -269,7 +269,7 @@ export function AudioTab() {
           )}
         >
           <div className="shrink-0 mb-4">
-            <h3 className="text-lg font-semibold">{t('audioChannels.devices.title')}</h3>
+            <h3 className="brand-label text-sm">{t('audioChannels.devices.title')}</h3>
             <p className="text-sm text-muted-foreground mt-1">
               {selectedChannelId
                 ? selectedChannel?.is_default

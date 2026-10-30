@@ -618,7 +618,7 @@ export function GpuPage() {
         </SettingSection>
       )}
 
-      <p className="text-xs text-muted-foreground/60 leading-relaxed">{t('settings.gpu.footer')}</p>
+      <p className="text-xs text-muted-foreground/80 leading-relaxed">{t('settings.gpu.footer')}</p>
     </div>
   );
 }

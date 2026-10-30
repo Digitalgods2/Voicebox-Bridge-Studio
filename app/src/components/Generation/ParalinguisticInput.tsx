@@ -349,7 +349,7 @@ export const ParalinguisticInput = forwardRef<ParalinguisticInputRef, Paralingui
         {/* Placeholder */}
         {isEmpty && placeholder && (
           <div
-            className="pointer-events-none absolute inset-0 text-sm text-muted-foreground/60 px-3 py-2 select-none"
+            className="pointer-events-none absolute inset-0 text-sm text-[hsl(var(--placeholder))] px-3 py-2 select-none"
             aria-hidden
           >
             {placeholder}
@@ -406,7 +406,7 @@ export const ParalinguisticInput = forwardRef<ParalinguisticInputRef, Paralingui
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: 4 }}
                 transition={{ duration: 0.12 }}
-                className="fixed z-[9999] min-w-[200px] max-h-[280px] overflow-y-auto rounded-lg border border-border bg-popover shadow-lg"
+                className="fixed z-[9999] min-w-[200px] max-h-[280px] overflow-y-auto rounded-lg border border-accent/25 bg-popover shadow-xl shadow-black/60"
                 style={{
                   bottom: menuPosition.bottom,
                   left: menuPosition.left,

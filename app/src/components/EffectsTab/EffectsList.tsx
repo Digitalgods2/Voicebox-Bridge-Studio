@@ -68,7 +68,7 @@ export function EffectsList() {
         <div className="px-4 pb-6 space-y-4">
           {builtIn.length > 0 && (
             <div>
-              <div className="text-[11px] text-muted-foreground font-medium uppercase tracking-wider mb-2 px-1">
+              <div className="brand-label text-[11px] mb-2 px-1">
                 {t('effects.sections.builtin')}
               </div>
               <div className="space-y-1.5">
@@ -86,7 +86,7 @@ export function EffectsList() {
 
           {userPresets.length > 0 && (
             <div>
-              <div className="text-[11px] text-muted-foreground font-medium uppercase tracking-wider mb-2 px-1">
+              <div className="brand-label text-[11px] mb-2 px-1">
                 {t('effects.sections.custom')}
               </div>
               <div className="space-y-1.5">
@@ -104,9 +104,7 @@ export function EffectsList() {
 
           {isCreatingNew && (
             <div>
-              <div className="text-[11px] text-muted-foreground font-medium uppercase tracking-wider mb-2 px-1">
-                {t('effects.sections.new')}
-              </div>
+              <div className="brand-label text-[11px] mb-2 px-1">{t('effects.sections.new')}</div>
               <div className="rounded-xl border-2 border-accent/40 bg-accent/5 p-3">
                 <div className="flex items-center gap-2">
                   <Sparkles className="h-4 w-4 text-accent" />
@@ -171,7 +169,7 @@ function PresetCard({
         <span className="text-[10px] text-muted-foreground">
           {t('effects.effectCount', { count: effectCount })}
         </span>
-        <span className="text-[10px] text-muted-foreground/50">
+        <span className="text-[10px] text-muted-foreground/80">
           {preset.effects_chain
             .filter((e) => e.enabled)
             .map((e) => e.type)

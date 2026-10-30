@@ -266,7 +266,7 @@ export function EffectsDetail() {
   return (
     <div className="flex flex-col h-full min-h-0">
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-lg font-semibold">
+        <h2 className="brand-title text-2xl leading-tight">
           {isCreatingNew
             ? t('effects.detail.newTitle')
             : isBuiltIn

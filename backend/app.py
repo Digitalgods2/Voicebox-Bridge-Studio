@@ -187,6 +187,11 @@ def _configure_cors(application: FastAPI) -> None:
     )
 
 
+# App pages that share their path with an API GET route, which would win over
+# the SPA catch-all. Keep in sync with app/src/router.tsx.
+SPA_PAGES_SHADOWED_BY_API = frozenset({"/stories", "/captures", "/settings/generation", "/settings/captures"})
+
+
 def _mount_frontend(application: FastAPI) -> None:
     """Serve the built web frontend when present (Docker, web, or local launcher).
 
@@ -210,6 +215,18 @@ def _mount_frontend(application: FastAPI) -> None:
             StaticFiles(directory=str(assets_dir)),
             name="frontend-assets",
         )
+
+    # A browser loading one of those pages directly (refresh, new tab) asks for
+    # a document; the app's own fetch() calls to the same path do not.
+    @application.middleware("http")
+    async def serve_shadowed_pages(request, call_next):
+        if (
+            request.method == "GET"
+            and request.url.path in SPA_PAGES_SHADOWED_BY_API
+            and request.headers.get("sec-fetch-dest") == "document"
+        ):
+            return FileResponse(frontend_dir / "index.html", media_type="text/html")
+        return await call_next(request)
 
     # SPA catch-all: serve files if they exist, otherwise index.html for
     # client-side routes like /voices, /stories, /models, etc.

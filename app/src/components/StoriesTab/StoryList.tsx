@@ -274,7 +274,7 @@ export function StoryList() {
                       <span className="text-foreground font-medium">{story.name}</span>
                       {story.description ? (
                         <>
-                          <span className="mx-1.5 text-muted-foreground/50">·</span>
+                          <span className="mx-1.5 text-muted-foreground/80">·</span>
                           <span className="text-muted-foreground">{story.description}</span>
                         </>
                       ) : null}

@@ -323,7 +323,7 @@ function SortableEffectItem({
 
         <button
           type="button"
-          className="p-0.5 text-muted-foreground/50 hover:text-muted-foreground cursor-grab active:cursor-grabbing touch-none"
+          className="p-0.5 text-muted-foreground/80 hover:text-muted-foreground cursor-grab active:cursor-grabbing touch-none"
           {...attributes}
           {...listeners}
         >

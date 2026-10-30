@@ -582,7 +582,7 @@ export function HistoryTable() {
                         variant="ghost"
                         size="icon"
                         className={cn(
-                          'h-6 w-6 text-muted-foreground/50 hover:bg-muted-foreground/20 hover:text-muted-foreground',
+                          'h-6 w-6 text-muted-foreground/80 hover:bg-muted-foreground/20 hover:text-muted-foreground',
                           gen.is_favorited && 'text-accent hover:text-accent',
                         )}
                         aria-label={gen.is_favorited ? 'Unfavorite' : 'Favorite'}
@@ -598,7 +598,7 @@ export function HistoryTable() {
                           variant="ghost"
                           size="icon"
                           className={cn(
-                            'h-6 w-6 text-muted-foreground/50 hover:bg-muted-foreground/20 hover:text-muted-foreground',
+                            'h-6 w-6 text-muted-foreground/80 hover:bg-muted-foreground/20 hover:text-muted-foreground',
                             isVersionsExpanded && 'text-accent hover:text-accent',
                           )}
                           aria-label="Toggle versions"
@@ -613,7 +613,7 @@ export function HistoryTable() {
                           <Button
                             variant="ghost"
                             size="icon"
-                            className="h-6 w-6 text-muted-foreground/50 hover:bg-muted-foreground/20 hover:text-muted-foreground"
+                            className="h-6 w-6 text-muted-foreground/80 hover:bg-muted-foreground/20 hover:text-muted-foreground"
                             aria-label="Retry generation"
                             onClick={() => handleRetry(gen.id)}
                           >
@@ -622,7 +622,7 @@ export function HistoryTable() {
                           <Button
                             variant="ghost"
                             size="icon"
-                            className="h-6 w-6 text-muted-foreground/50 hover:bg-muted-foreground/20 hover:text-muted-foreground"
+                            className="h-6 w-6 text-muted-foreground/80 hover:bg-muted-foreground/20 hover:text-muted-foreground"
                             aria-label="Delete generation"
                             disabled={deleteGeneration.isPending}
                             onClick={() => handleDeleteClick(gen.id, gen.profile_name)}
@@ -634,7 +634,7 @@ export function HistoryTable() {
                         <Button
                           variant="ghost"
                           size="icon"
-                          className="h-6 w-6 text-muted-foreground/50 hover:bg-muted-foreground/20 hover:text-muted-foreground"
+                          className="h-6 w-6 text-muted-foreground/80 hover:bg-muted-foreground/20 hover:text-muted-foreground"
                           aria-label="Cancel generation"
                           disabled={isCancelling}
                           onClick={() => cancelGeneration.mutate(gen.id)}
@@ -651,7 +651,7 @@ export function HistoryTable() {
                             <Button
                               variant="ghost"
                               size="icon"
-                              className="h-6 w-6 text-muted-foreground/50 hover:bg-muted-foreground/20 hover:text-muted-foreground"
+                              className="h-6 w-6 text-muted-foreground/80 hover:bg-muted-foreground/20 hover:text-muted-foreground"
                               aria-label={t('history.actions.menu')}
                               disabled={isGenerating}
                             >
@@ -749,7 +749,7 @@ export function HistoryTable() {
                                     </span>
                                   )}
                                   {showSource && (
-                                    <span className="text-[10px] text-muted-foreground/60 truncate">
+                                    <span className="text-[10px] text-muted-foreground/80 truncate">
                                       from {sourceVersion.label}
                                     </span>
                                   )}

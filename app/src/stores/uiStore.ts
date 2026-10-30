@@ -1,19 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
-export type Theme = 'light' | 'dark' | 'system';
-
-function resolveTheme(theme: Theme): 'light' | 'dark' {
-  if (theme !== 'system') return theme;
-  if (typeof window === 'undefined') return 'dark';
-  return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-}
-
-function applyTheme(theme: Theme) {
-  if (typeof document === 'undefined') return;
-  document.documentElement.classList.toggle('dark', resolveTheme(theme) === 'dark');
-}
-
 // Draft state for the create voice profile form
 export interface ProfileFormDraft {
   name: string;
@@ -61,10 +48,6 @@ interface UIStore {
   // Profile form draft (for persisting create voice modal state)
   profileFormDraft: ProfileFormDraft | null;
   setProfileFormDraft: (draft: ProfileFormDraft | null) => void;
-
-  // Theme
-  theme: Theme;
-  setTheme: (theme: Theme) => void;
 }
 
 export const useUIStore = create<UIStore>()(
@@ -92,22 +75,12 @@ export const useUIStore = create<UIStore>()(
 
       profileFormDraft: null,
       setProfileFormDraft: (draft) => set({ profileFormDraft: draft }),
-
-      theme: 'system',
-      setTheme: (theme) => {
-        set({ theme });
-        applyTheme(theme);
-      },
     }),
     {
       name: 'voicebox-ui',
       partialize: (state) => ({
         selectedProfileId: state.selectedProfileId,
-        theme: state.theme,
       }),
-      onRehydrateStorage: () => (state) => {
-        if (state) applyTheme(state.theme);
-      },
     },
   ),
 );

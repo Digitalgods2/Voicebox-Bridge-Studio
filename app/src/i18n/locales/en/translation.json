@@ -788,6 +788,14 @@
         "title": "Join the Discord",
         "subtitle": "Get help & share voices"
       },
+      "project": {
+        "title": "Project on GitHub",
+        "subtitle": "Source, releases, and issues"
+      },
+      "help": {
+        "title": "Help & README",
+        "subtitle": "Setup, features, and troubleshooting"
+      },
       "serverUrl": {
         "title": "Server URL",
         "description": "The address of your VoiceBox Bridge Studio backend server.",

@@ -35,7 +35,7 @@ const Toggle = React.forwardRef<HTMLButtonElement, ToggleProps>(
       >
         <span
           className={cn(
-            'pointer-events-none block h-4 w-4 rounded-full bg-white shadow-sm transition-transform',
+            'pointer-events-none block h-4 w-4 rounded-full bg-foreground shadow-sm transition-transform',
             checked ? 'translate-x-[18px]' : 'translate-x-[2px]',
           )}
         />

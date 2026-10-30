@@ -129,7 +129,7 @@ export function VoiceChangerTab() {
   return (
     <div className="flex flex-col h-full min-h-0">
       <div className="shrink-0 pb-4">
-        <h1 className="text-lg font-semibold">Voice Changer</h1>
+        <h1 className="brand-title text-3xl leading-tight">Voice Changer</h1>
         <p className="text-sm text-muted-foreground">
           Convert speech into one of your voices while keeping the original timing, pacing, and
           delivery.
@@ -140,7 +140,7 @@ export function VoiceChangerTab() {
 
       <div className="flex-1 min-h-0 overflow-y-auto pb-8">
         <div className="grid gap-6 lg:grid-cols-[360px_1fr]">
-          <section className="space-y-5 rounded-lg border p-5 h-fit">
+          <section className="space-y-5 rounded-xl border border-accent/20 bg-card/70 p-5 h-fit shadow-[0_12px_40px_-20px_rgba(0,0,0,0.9)]">
             <div className="space-y-2">
               <Label>Target voice</Label>
               <Select value={profileId} onValueChange={setProfileId}>
@@ -233,7 +233,7 @@ export function VoiceChangerTab() {
             </label>
           </section>
 
-          <section className="rounded-lg border p-5 min-w-0">
+          <section className="rounded-xl border border-accent/20 bg-card/70 p-5 min-w-0 shadow-[0_12px_40px_-20px_rgba(0,0,0,0.9)]">
             <Tabs defaultValue="audio">
               <TabsList>
                 <TabsTrigger value="audio" className="gap-1.5">
@@ -404,7 +404,7 @@ function MediaPreview({
 function Panel({ title, children }: { title: string; children: ReactNode }) {
   return (
     <div className="space-y-2">
-      <Label className="text-xs text-muted-foreground uppercase tracking-wide">{title}</Label>
+      <Label className="brand-label text-xs">{title}</Label>
       {children}
     </div>
   );

@@ -149,14 +149,14 @@ export function GenerationPage() {
 
       <aside className="hidden lg:block w-[280px] shrink-0 space-y-6 sticky top-0">
         <div className="space-y-2">
-          <h3 className="text-sm font-semibold">{t('settings.generation.sidebar.aboutTitle')}</h3>
+          <h3 className="brand-label text-xs">{t('settings.generation.sidebar.aboutTitle')}</h3>
           <p className="text-sm text-muted-foreground leading-relaxed">
             {t('settings.generation.sidebar.aboutBody')}
           </p>
         </div>
 
         <div className="space-y-3">
-          <h3 className="text-sm font-semibold">{t('settings.generation.sidebar.differencesTitle')}</h3>
+          <h3 className="brand-label text-xs">{t('settings.generation.sidebar.differencesTitle')}</h3>
           <ul className="space-y-3 text-sm text-muted-foreground">
             <li className="flex gap-2.5">
               <Mic className="h-4 w-4 shrink-0 mt-0.5 text-accent" />

@@ -451,7 +451,7 @@ export function ModelManagement() {
     <div className="flex flex-col h-full">
       {/* Header */}
       <div className="shrink-0 pb-4">
-        <h1 className="text-lg font-semibold">{t('models.title')}</h1>
+        <h1 className="brand-title text-3xl leading-tight">{t('models.title')}</h1>
         <p className="text-sm text-muted-foreground">{t('models.subtitle')}</p>
       </div>
 
@@ -539,9 +539,7 @@ export function ModelManagement() {
         <div className="flex-1 min-h-0 overflow-y-auto space-y-6 pb-6">
           {sections.map((section) => (
             <div key={section.label}>
-              <h2 className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-1 px-1">
-                {section.label}
-              </h2>
+              <h2 className="brand-label text-xs mb-1.5 px-1">{section.label}</h2>
               <div className="border rounded-lg divide-y overflow-hidden">
                 {section.models.map((model) => {
                   const { isDownloading, hasError } = getModelState(model);
@@ -563,7 +561,7 @@ export function ModelManagement() {
                         ) : model.downloaded ? (
                           <CircleCheck className="h-4 w-4 text-emerald-500" />
                         ) : (
-                          <Download className="h-4 w-4 text-muted-foreground/50" />
+                          <Download className="h-4 w-4 text-muted-foreground/80" />
                         )}
                       </div>
 
@@ -606,7 +604,7 @@ export function ModelManagement() {
                           </span>
                         )}
 
-                        <ChevronRight className="h-4 w-4 text-muted-foreground/40 group-hover:text-muted-foreground transition-colors" />
+                        <ChevronRight className="h-4 w-4 text-muted-foreground/80 group-hover:text-muted-foreground transition-colors" />
                       </div>
                     </button>
                   );
@@ -1081,7 +1079,7 @@ export function ModelManagement() {
           <div className="w-full max-w-md px-8 space-y-6 text-center">
             <div className="space-y-2">
               <Loader2 className="h-8 w-8 animate-spin mx-auto text-muted-foreground" />
-              <h2 className="text-lg font-semibold">{t('models.migrate.title')}</h2>
+              <h2 className="brand-title text-xl leading-tight">{t('models.migrate.title')}</h2>
               <p className="text-sm text-muted-foreground">
                 {migrationProgress.status === 'complete'
                   ? t('models.migrateDialog.restartingServer')

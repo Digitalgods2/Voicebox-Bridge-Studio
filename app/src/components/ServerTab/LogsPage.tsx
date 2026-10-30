@@ -17,7 +17,7 @@ function formatTime(timestamp: number): string {
 function LogLine({ entry }: { entry: LogEntry }) {
   return (
     <div className="flex gap-3 font-mono text-xs leading-5 hover:bg-muted/30">
-      <span className="text-muted-foreground/50 select-none shrink-0">
+      <span className="text-muted-foreground/80 select-none shrink-0">
         {formatTime(entry.timestamp)}
       </span>
       <span
@@ -58,7 +58,7 @@ export function LogsPage() {
     <div className="flex flex-col h-full min-h-0">
       <div className="flex items-center justify-between mb-3">
         <div>
-          <h3 className="text-sm font-medium">{t('settings.logs.title')}</h3>
+          <h3 className="brand-label text-xs">{t('settings.logs.title')}</h3>
           <p className="text-sm text-muted-foreground">
             {t('settings.logs.lineCount', { count: entries.length })}
           </p>
@@ -88,7 +88,7 @@ export function LogsPage() {
         className="flex-1 min-h-0 overflow-y-auto rounded-md border bg-black/20 p-3"
       >
         {entries.length === 0 ? (
-          <div className="text-sm text-muted-foreground/50 font-mono space-y-1">
+          <div className="text-sm text-muted-foreground/80 font-mono space-y-1">
             <p>{t('settings.logs.empty')}</p>
             {!import.meta.env?.PROD && <p>{t('settings.logs.devHint')}</p>}
           </div>

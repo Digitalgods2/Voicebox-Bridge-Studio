@@ -1081,7 +1081,7 @@ export function StoryTrackEditor({ storyId, items }: StoryTrackEditorProps) {
   }
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 border-t bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60 z-50">
+    <div className="fixed bottom-0 left-0 right-0 border-t border-accent/25 bg-card/95 backdrop-blur supports-backdrop-filter:bg-card/80 shadow-[0_-12px_30px_-12px_rgba(0,0,0,0.7)] z-50">
       <div
         className="border-t bg-background/30 backdrop-blur-2xl overflow-hidden relative"
         ref={containerRef}
@@ -1093,7 +1093,7 @@ export function StoryTrackEditor({ storyId, items }: StoryTrackEditorProps) {
           onMouseDown={handleResizeStart}
           aria-label="Resize track editor"
         >
-          <GripHorizontal className="h-3 w-3 text-muted-foreground/50 group-hover:text-muted-foreground" />
+          <GripHorizontal className="h-3 w-3 text-muted-foreground/80 group-hover:text-muted-foreground" />
         </button>
 
         {/* Toolbar */}
@@ -1335,7 +1335,7 @@ export function StoryTrackEditor({ storyId, items }: StoryTrackEditorProps) {
                         onClick={handleAddTrackAbove}
                         title="Add track above"
                         aria-label="Add track above"
-                        className="absolute top-0 right-0 left-0 h-3 flex items-center justify-center text-muted-foreground/50 hover:text-foreground hover:bg-muted/40 transition-colors"
+                        className="absolute top-0 right-0 left-0 h-3 flex items-center justify-center text-muted-foreground/80 hover:text-foreground hover:bg-muted/40 transition-colors"
                       >
                         <Plus className="h-2.5 w-2.5" />
                       </button>
@@ -1346,7 +1346,7 @@ export function StoryTrackEditor({ storyId, items }: StoryTrackEditorProps) {
                         onClick={handleAddTrackBelow}
                         title="Add track below"
                         aria-label="Add track below"
-                        className="absolute bottom-0 right-0 left-0 h-3 flex items-center justify-center text-muted-foreground/50 hover:text-foreground hover:bg-muted/40 transition-colors"
+                        className="absolute bottom-0 right-0 left-0 h-3 flex items-center justify-center text-muted-foreground/80 hover:text-foreground hover:bg-muted/40 transition-colors"
                       >
                         <Plus className="h-2.5 w-2.5" />
                       </button>

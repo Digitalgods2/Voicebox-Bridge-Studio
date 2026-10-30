@@ -42,61 +42,46 @@
   --color-chart-5: hsl(var(--chart-5));
 }
 
-:root {
-  --background: 0 0% 95%;
-  --foreground: 0 0% 5%;
-  --card: 0 0% 97%;
-  --card-foreground: 0 0% 5%;
-  --popover: 0 0% 97%;
-  --popover-foreground: 0 0% 5%;
-  --primary: 43 55% 58%;
-  --primary-foreground: 0 0% 100%;
-  --secondary: 0 0% 92%;
-  --secondary-foreground: 0 0% 11%;
-  --muted: 0 0% 90%;
-  --muted-foreground: 0 0% 47%;
-  --accent: 43 55% 58%;
-  --accent-foreground: 0 0% 100%;
-  --destructive: 0 84.2% 60.2%;
-  --destructive-foreground: 0 0% 98%;
-  --border: 0 0% 85%;
-  --input: 0 0% 88%;
-  --ring: 0 0% 5%;
-  --sidebar: 0 0% 92%;
-  --radius: 0.5rem;
-  --chart-1: 12 76% 61%;
-  --chart-2: 173 58% 39%;
-  --chart-3: 197 37% 24%;
-  --chart-4: 43 74% 66%;
-  --chart-5: 27 87% 67%;
-}
-
+/* VoiceBox Bridge Studio has one theme: gold on black-brown, matching the
+   launch title card. :root and .dark carry the same palette so nothing can
+   fall back to a light look; the .dark class stays on <html> for dark:
+   variants. Text pairs are at least 4.5:1 (most well above 7:1). */
+:root,
 .dark {
-  --background: 0 0% 6%;
-  --foreground: 0 0% 95%;
-  --card: 0 0% 8%;
-  --card-foreground: 0 0% 95%;
-  --popover: 0 0% 8%;
-  --popover-foreground: 0 0% 95%;
-  --primary: 0 0% 18%;
-  --primary-foreground: 0 0% 95%;
-  --secondary: 0 0% 12%;
-  --secondary-foreground: 0 0% 95%;
-  --muted: 0 0% 12%;
-  --muted-foreground: 0 0% 60%;
-  --accent: 43 50% 45%;
-  --accent-foreground: 0 0% 95%;
-  --destructive: 0 62.8% 50%;
-  --destructive-foreground: 0 0% 95%;
-  --border: 0 0% 12%;
-  --input: 0 0% 12%;
-  --ring: 0 0% 40%;
-  --sidebar: 0 0% 4%;
-  --chart-1: 220 70% 50%;
-  --chart-2: 160 60% 45%;
-  --chart-3: 30 80% 55%;
-  --chart-4: 280 65% 60%;
-  --chart-5: 340 75% 55%;
+  --background: 30 25% 5%;
+  --foreground: 40 45% 92%;
+  --card: 30 22% 8%;
+  --card-foreground: 40 45% 92%;
+  --popover: 30 24% 9%;
+  --popover-foreground: 40 45% 92%;
+  --primary: 40 62% 57%;
+  --primary-foreground: 30 40% 7%;
+  --secondary: 30 17% 12%;
+  --secondary-foreground: 40 45% 92%;
+  --muted: 30 17% 13%;
+  --muted-foreground: 38 22% 70%;
+  --accent: 40 62% 57%;
+  --accent-foreground: 30 40% 7%;
+  --destructive: 2 72% 60%;
+  --destructive-foreground: 30 40% 7%;
+  --border: 33 22% 17%;
+  --input: 33 26% 24%;
+  --ring: 40 65% 60%;
+  --sidebar: 30 30% 3.5%;
+  /* Text fields sit slightly lighter than the page; placeholders stay readable. */
+  --field: 30 20% 9%;
+  --placeholder: 38 22% 64%;
+  --radius: 0.5rem;
+  --chart-1: 40 62% 57%;
+  --chart-2: 28 55% 45%;
+  --chart-3: 45 75% 72%;
+  --chart-4: 20 45% 35%;
+  --chart-5: 35 85% 62%;
+
+  --font-display: "Palatino Linotype", "Book Antiqua", Palatino, Georgia, "Times New Roman", serif;
+  --gold-gradient: linear-gradient(180deg, #fff1cf 0%, #e6c27a 42%, #b8863a 68%, #f1d491 100%);
+  --gold-fill: linear-gradient(180deg, #f0d08a 0%, #d6a74f 55%, #b8863a 100%);
+  color-scheme: dark;
 }
 
 @layer base {
@@ -107,8 +92,15 @@
   body {
     @apply overflow-hidden;
   }
+  html {
+    background-color: hsl(var(--background));
+  }
   body {
-    @apply bg-background text-foreground;
+    @apply text-foreground;
+    /* A warm glow from the top, echoing the title card. */
+    background:
+      radial-gradient(ellipse 70% 45% at 55% -8%, rgba(214, 167, 79, 0.11), transparent 70%),
+      hsl(var(--background));
   }
   /* Hide scrollbars globally */
   * {
@@ -162,7 +154,7 @@
 .launch-screen {
   background: radial-gradient(ellipse at 50% 38%, #2a1d0c 0%, #0d0905 45%, #000 80%);
   color: #e9cf96;
-  font-family: "Palatino Linotype", "Book Antiqua", Palatino, Georgia, "Times New Roman", serif;
+  font-family: var(--font-display);
   animation: fadeIn 0.6s ease-out both;
 }
 
@@ -194,7 +186,7 @@
 }
 
 .launch-screen-gold {
-  background: linear-gradient(180deg, #fff1cf 0%, #e6c27a 42%, #b8863a 68%, #f1d491 100%);
+  background: var(--gold-gradient);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
@@ -265,6 +257,50 @@
   .launch-screen-leave {
     animation: none;
   }
+}
+
+/* Studio brand styles shared by every screen. */
+.studio-backdrop {
+  background:
+    radial-gradient(ellipse 60% 40% at 58% -10%, rgba(214, 167, 79, 0.12), transparent 70%),
+    radial-gradient(ellipse 50% 35% at 100% 110%, rgba(184, 134, 58, 0.06), transparent 70%),
+    hsl(var(--background));
+}
+
+/* Page titles: the title card's gold serif. */
+.brand-title {
+  font-family: var(--font-display);
+  font-weight: 500;
+  letter-spacing: 0.03em;
+  background: var(--gold-gradient);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* Section labels: small gold serif capitals. */
+.brand-label {
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  color: hsl(40 55% 66%);
+}
+
+/* Primary action fill. */
+.gold-fill {
+  background-image: var(--gold-fill);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 241, 207, 0.45),
+    0 4px 18px -6px rgba(214, 167, 79, 0.45);
+}
+
+.gold-fill:hover:not(:disabled) {
+  filter: brightness(1.07);
+}
+
+/* Fine gold edge for raised surfaces (popovers, dialogs, glass bars). */
+.gold-hairline {
+  border-color: rgba(214, 167, 79, 0.28);
 }
 
 /* The sidebar is wide enough to show the emblem large. Layout that sits

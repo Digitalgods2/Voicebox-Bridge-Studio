@@ -621,11 +621,11 @@ export function CapturesTab() {
               <span>{formatAbsoluteDate(selected.created_at)}</span>
               {selected.language && (
                 <>
-                  <span className="text-muted-foreground/40">·</span>
+                  <span className="text-muted-foreground/80">·</span>
                   <span>{selected.language.toUpperCase()}</span>
                 </>
               )}
-              <span className="text-muted-foreground/40">·</span>
+              <span className="text-muted-foreground/80">·</span>
               <SourceBadge source={selected.source} />
             </div>
 
@@ -743,7 +743,7 @@ export function CapturesTab() {
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="start" className="w-64">
-                    <DropdownMenuLabel className="text-[11px] font-medium text-muted-foreground uppercase tracking-wide">
+                    <DropdownMenuLabel className="brand-label text-[11px]">
                       {t('captures.actions.playAsDropdownLabel')}
                     </DropdownMenuLabel>
                     <DropdownMenuSeparator />
@@ -795,7 +795,7 @@ export function CapturesTab() {
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="start" className="w-56">
-                  <DropdownMenuLabel className="text-[11px] font-medium text-muted-foreground uppercase tracking-wide">
+                  <DropdownMenuLabel className="brand-label text-[11px]">
                     {t('captures.actions.exportDropdownLabel')}
                   </DropdownMenuLabel>
                   <DropdownMenuSeparator />
@@ -850,7 +850,7 @@ export function CapturesTab() {
                   {pushToTalkKeys.length ? (
                     <div className="flex items-center justify-center gap-3">
                       <ChordKeys keys={pushToTalkKeys} />
-                      <span className="text-[11px] uppercase tracking-wider text-muted-foreground">
+                      <span className="brand-label text-[11px]">
                         {t('captures.empty.holdToRecord')}
                       </span>
                     </div>
@@ -858,7 +858,7 @@ export function CapturesTab() {
                   {toggleToTalkKeys.length ? (
                     <div className="flex items-center justify-center gap-3">
                       <ChordKeys keys={toggleToTalkKeys} />
-                      <span className="text-[11px] uppercase tracking-wider text-muted-foreground">
+                      <span className="brand-label text-[11px]">
                         {t('captures.empty.toggleHandsFree')}
                       </span>
                     </div>

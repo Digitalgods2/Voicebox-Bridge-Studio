@@ -24,7 +24,7 @@ export function AppFrame({ children }: AppFrameProps) {
 
   return (
     <div
-      className={cn('h-screen bg-background flex flex-col overflow-hidden', TOP_SAFE_AREA_PADDING)}
+      className={cn('h-screen studio-backdrop flex flex-col overflow-hidden', TOP_SAFE_AREA_PADDING)}
     >
       <TitleBarDragRegion />
       <AudioKeepAlive />

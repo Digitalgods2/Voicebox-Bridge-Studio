@@ -112,7 +112,7 @@ export function VoicesTab() {
         {/* Fixed Header */}
         <div className="absolute top-0 left-0 right-0 z-20 pl-8 pr-8">
           <div className="flex items-center gap-3 mb-6">
-            <h1 className="text-2xl font-bold">{t('voicesTab.title')}</h1>
+            <h1 className="brand-title text-3xl leading-tight">{t('voicesTab.title')}</h1>
             <div className="flex-1" />
             <div className="relative w-[240px]">
               <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />

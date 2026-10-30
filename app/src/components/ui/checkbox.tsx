@@ -27,7 +27,7 @@ const Checkbox = React.forwardRef<HTMLButtonElement, CheckboxProps>(
         }}
         className={cn(
           'h-4 w-4 rounded border-2 flex items-center justify-center shrink-0 transition-colors',
-          checked ? 'bg-accent border-accent' : 'border-muted-foreground/30',
+          checked ? 'bg-accent border-accent' : 'border-muted-foreground/60 hover:border-accent/70',
           disabled && 'opacity-50 cursor-not-allowed',
           !disabled && 'cursor-pointer',
           className,

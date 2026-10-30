@@ -49,7 +49,7 @@ interface ListPaneTitleProps {
 }
 
 export function ListPaneTitle({ className, children }: ListPaneTitleProps) {
-  return <h2 className={cn('text-2xl px-4 font-bold truncate', className)}>{children}</h2>;
+  return <h2 className={cn('brand-title text-3xl leading-tight px-4 truncate', className)}>{children}</h2>;
 }
 
 interface ListPaneActionsProps {

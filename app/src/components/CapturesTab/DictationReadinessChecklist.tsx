@@ -38,7 +38,7 @@ function ChecklistRow({ icon, title, description, ready, action }: RowProps) {
         {ready ? (
           <CheckCircle2 className="h-5 w-5 text-accent" />
         ) : (
-          <Circle className="h-5 w-5 text-muted-foreground/50" />
+          <Circle className="h-5 w-5 text-muted-foreground/80" />
         )}
       </div>
       <div className="flex-1 min-w-0 space-y-1">
@@ -197,12 +197,8 @@ export function DictationReadinessChecklist({
     <div className={cn('w-full space-y-2.5', !compact && 'max-w-md mx-auto')}>
       {!compact && (
         <div className="text-center mb-5 space-y-1">
-          <h2 className="text-base font-semibold text-foreground">
-            {t('captures.readiness.title')}
-          </h2>
-          <p className="text-xs text-muted-foreground">
-            {t('captures.readiness.subheading')}
-          </p>
+          <h2 className="brand-title text-xl leading-tight">{t('captures.readiness.title')}</h2>
+          <p className="text-xs text-muted-foreground">{t('captures.readiness.subheading')}</p>
         </div>
       )}
 
@@ -283,5 +279,4 @@ export function DictationReadinessChecklist({
   );
 }
 
-const isMacOS =
-  typeof navigator !== 'undefined' && /Mac|iPhone|iPad/.test(navigator.userAgent);
+const isMacOS = typeof navigator !== 'undefined' && /Mac|iPhone|iPad/.test(navigator.userAgent);

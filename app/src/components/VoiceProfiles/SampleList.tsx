@@ -220,7 +220,7 @@ export function SampleList({ profileId }: SampleListProps) {
     <div className="space-y-4 pt-4">
       {samples && samples.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-8 text-center border border-dashed rounded-lg">
-          <Volume2 className="h-8 w-8 text-muted-foreground/50 mb-2" />
+          <Volume2 className="h-8 w-8 text-muted-foreground/80 mb-2" />
           <p className="text-sm text-muted-foreground">{t('sampleList.empty.title')}</p>
           <p className="text-xs text-muted-foreground/70 mt-1">{t('sampleList.empty.hint')}</p>
         </div>
@@ -300,7 +300,7 @@ export function SampleList({ profileId }: SampleListProps) {
                       </div>
 
                       {/* Sample Number Badge */}
-                      <div className="absolute top-1 right-2 text-[10px] text-muted-foreground/50 font-medium">
+                      <div className="absolute top-1 right-2 text-[10px] text-muted-foreground/80 font-medium">
                         #{index + 1}
                       </div>
                     </div>

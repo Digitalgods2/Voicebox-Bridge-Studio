@@ -374,7 +374,7 @@ export function StoryContent() {
       {/* Header */}
       <div className="absolute top-0 left-0 right-0 z-20 flex items-center justify-between px-1">
         <div>
-          <h2 className="text-2xl font-bold">{story.name}</h2>
+          <h2 className="brand-title text-3xl leading-tight">{story.name}</h2>
           {story.description && (
             <p className="text-sm text-muted-foreground mt-1">{story.description}</p>
           )}
@@ -465,7 +465,7 @@ export function StoryContent() {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-60">
-                <DropdownMenuLabel className="text-[11px] font-medium text-muted-foreground uppercase tracking-wide">
+                <DropdownMenuLabel className="brand-label text-[11px]">
                   {t('storyContent.exportDropdownLabel')}
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />

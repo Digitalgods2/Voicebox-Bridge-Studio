@@ -41,7 +41,7 @@ function renderMarkdown(md: string): React.ReactNode[] {
     }
     if (line.startsWith('### ')) {
       elements.push(
-        <h4 key={elements.length} className="text-sm font-medium mt-6 mb-2">
+        <h4 key={elements.length} className="brand-label text-xs mt-6 mb-2">
           {inlineMarkdown(line.slice(4))}
         </h4>,
       );
@@ -60,7 +60,7 @@ function renderMarkdown(md: string): React.ReactNode[] {
         <ul key={elements.length} className="space-y-1 my-2">
           {items.map((item, idx) => (
             <li key={idx} className="text-sm text-muted-foreground flex gap-2">
-              <span className="text-muted-foreground/50 select-none shrink-0">&bull;</span>
+              <span className="text-muted-foreground/80 select-none shrink-0">&bull;</span>
               <span>{inlineMarkdown(item)}</span>
             </li>
           ))}
@@ -185,7 +185,7 @@ function ChangelogEntryCard({ entry }: { entry: ChangelogEntry }) {
   return (
     <div className="border-b border-border/50 pb-6">
       <div className="flex items-baseline gap-3 mb-3">
-        <h3 className="text-xl font-semibold tracking-tight">{entry.version}</h3>
+        <h3 className="brand-title text-2xl leading-tight">{entry.version}</h3>
         {entry.date && <span className="text-xs text-muted-foreground">{entry.date}</span>}
         {entry.version === 'Unreleased' && (
           <Badge variant="outline">{t('settings.changelog.devBadge')}</Badge>

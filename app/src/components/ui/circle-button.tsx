@@ -20,7 +20,7 @@ const CircleButton = React.forwardRef<HTMLButtonElement, CircleButtonProps>(
         )}
         {...props}
       >
-        <Icon className="h-3.5 w-3.5 text-muted-foreground/60" />
+        <Icon className="h-3.5 w-3.5 text-muted-foreground/80" />
       </button>
     );
   },

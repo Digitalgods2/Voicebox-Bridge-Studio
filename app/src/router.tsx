@@ -58,17 +58,21 @@ function RootLayout() {
         </main>
       </div>
 
-      {/* Show download toasts for any active downloads (from anywhere) */}
-      {activeDownloads.map((download) => {
-        const displayName = MODEL_DISPLAY_NAMES[download.model_name] || download.model_name;
-        return (
-          <DownloadToastRestorer
-            key={download.model_name}
-            modelName={download.model_name}
-            displayName={displayName}
-          />
-        );
-      })}
+      {/* Show download toasts for any active downloads (from anywhere). Failed downloads stay
+          in the server's active list for the Models page retry UI; they get no progress events,
+          so a toast for one would sit at "Connecting" forever. */}
+      {activeDownloads
+        .filter((download) => download.status !== 'error')
+        .map((download) => {
+          const displayName = MODEL_DISPLAY_NAMES[download.model_name] || download.model_name;
+          return (
+            <DownloadToastRestorer
+              key={download.model_name}
+              modelName={download.model_name}
+              displayName={displayName}
+            />
+          );
+        })}
 
       <Toaster />
     </AppFrame>

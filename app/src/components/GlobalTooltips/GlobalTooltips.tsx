@@ -52,6 +52,8 @@ function absorbTitle(el: HTMLElement) {
 function tipFor(el: HTMLElement): string | null {
   if (el.closest('[data-tip-off]')) return null;
   absorbTitle(el);
+  // A menu or popover trigger that is open would have its tooltip cover the menu.
+  if (el.getAttribute('aria-expanded') === 'true') return null;
   const explicit = el.getAttribute('data-tip');
   if (explicit !== null) return explicit.trim() || null;
   const native = el.getAttribute('data-tip-native');

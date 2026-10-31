@@ -67,6 +67,8 @@ export function useModelDownloadToast({
     });
     toastIdRef.current = toastResult.id;
     toastUpdateRef.current = toastResult.update;
+    // Until the first progress event arrives the toast only says "Connecting".
+    let receivedProgress = false;
 
     // Subscribe to progress updates via Server-Sent Events
     const eventSourceUrl = `${serverUrl}/models/progress/${modelName}`;
@@ -81,6 +83,7 @@ export function useModelDownloadToast({
       console.log('[useModelDownloadToast] Received SSE message:', event.data);
       try {
         const progress = JSON.parse(event.data) as ModelProgress;
+        receivedProgress = true;
 
         // Update toast with progress
         if (toastIdRef.current && toastUpdateRef.current) {
@@ -206,7 +209,9 @@ export function useModelDownloadToast({
         eventSourceRef.current.close();
         eventSourceRef.current = null;
       }
-      // Note: We don't dismiss the toast here as it might still be showing completion state
+      // A toast that already showed progress may still be showing its completion state, so it
+      // stays. One still saying "Connecting" would never change again; dismiss it.
+      if (!receivedProgress) toastResult.dismiss();
     };
   }, [enabled, serverUrl, modelName, displayName, toast, formatBytes, onComplete, onError]);
 

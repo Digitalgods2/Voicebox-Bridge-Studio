@@ -89,6 +89,7 @@ export function AudioSampleUpload({
                   type="button"
                   size="lg"
                   onClick={() => fileInputRef.current?.click()}
+                  data-tip="Choose an audio file of the voice. A clean 15–30 second single-speaker clip works best."
                   className="flex items-center gap-2"
                 >
                   <Upload className="h-5 w-5" />
@@ -122,6 +123,7 @@ export function AudioSampleUpload({
                     type="button"
                     variant="outline"
                     onClick={onTranscribe}
+                    data-tip="Fill in the reference text automatically by transcribing the sample locally with Whisper"
                     disabled={isTranscribing || isValidating || isDisabled}
                     className="flex items-center gap-2"
                   >

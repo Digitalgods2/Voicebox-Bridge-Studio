@@ -29,20 +29,64 @@ const tabs: Array<{
   icon: LucideIcon;
   labelKey?: string;
   label?: string;
+  tip: string;
 }> = [
-  { id: 'main', path: '/', icon: Volume2, labelKey: 'nav.generate' },
-  { id: 'stories', path: '/stories', icon: AudioLines, labelKey: 'nav.stories' },
-  { id: 'captures', path: '/captures', icon: Captions, labelKey: 'nav.captures' },
-  { id: 'voices', path: '/voices', icon: Mic, labelKey: 'nav.voices' },
+  {
+    id: 'main',
+    path: '/',
+    icon: Volume2,
+    labelKey: 'nav.generate',
+    tip: 'Generate: type text and speak it in one of your voices',
+  },
+  {
+    id: 'stories',
+    path: '/stories',
+    icon: AudioLines,
+    labelKey: 'nav.stories',
+    tip: 'Stories: arrange clips from several voices into a multi-track timeline',
+  },
+  {
+    id: 'captures',
+    path: '/captures',
+    icon: Captions,
+    labelKey: 'nav.captures',
+    tip: 'Captures: recordings and dictations, transcribed locally',
+  },
+  {
+    id: 'voices',
+    path: '/voices',
+    icon: Mic,
+    labelKey: 'nav.voices',
+    tip: 'Voices: your voice profiles, their samples, and per-voice effects',
+  },
   {
     id: 'speech-to-speech',
     path: '/speech-to-speech',
     icon: AudioWaveform,
     labelKey: 'nav.speechToSpeech',
+    tip: 'Speech to Speech: re-voice audio, video files, or YouTube videos while keeping the original timing and delivery',
   },
-  { id: 'effects', path: '/effects', icon: Wand2, labelKey: 'nav.effects' },
-  { id: 'models', path: '/models', icon: Box, labelKey: 'nav.models' },
-  { id: 'settings', path: '/settings', icon: Settings, labelKey: 'nav.settings' },
+  {
+    id: 'effects',
+    path: '/effects',
+    icon: Wand2,
+    labelKey: 'nav.effects',
+    tip: 'Effects: build reusable effect chains such as pitch, reverb, and EQ',
+  },
+  {
+    id: 'models',
+    path: '/models',
+    icon: Box,
+    labelKey: 'nav.models',
+    tip: 'Models: download, load, and remove local speech models',
+  },
+  {
+    id: 'settings',
+    path: '/settings',
+    icon: Settings,
+    labelKey: 'nav.settings',
+    tip: 'Settings: server, GPU, generation, captures, logs, and about',
+  },
 ];
 
 export function Sidebar({ isMacOS }: SidebarProps) {
@@ -56,13 +100,18 @@ export function Sidebar({ isMacOS }: SidebarProps) {
 
   return (
     <div
+      data-tip-side="right"
       className={cn(
         'fixed left-0 top-0 h-full w-[var(--sidebar-width)] bg-sidebar border-r border-accent/20 flex flex-col items-center py-5 gap-4',
         isMacOS && 'pt-12',
       )}
     >
       {/* Logo */}
-      <Link to="/settings/about" className="flex flex-col items-center gap-1.5 px-2 shrink-0">
+      <Link
+        to="/settings/about"
+        className="flex flex-col items-center gap-1.5 px-2 shrink-0"
+        data-tip="About VoiceBox Bridge Studio, credits, and license"
+      >
         <img
           src={appLogo}
           alt="VoiceBox Bridge Studio"
@@ -95,7 +144,7 @@ export function Sidebar({ isMacOS }: SidebarProps) {
                   ? 'border-accent/45 bg-accent/12 text-accent shadow-[0_0_18px_-6px_rgba(214,167,79,0.55)]'
                   : 'border-transparent text-muted-foreground hover:border-accent/20 hover:bg-accent/8 hover:text-foreground',
               )}
-              title={label}
+              data-tip={tab.tip}
               aria-current={isActive ? 'page' : undefined}
             >
               <Icon className="h-5 w-5" />
@@ -110,7 +159,9 @@ export function Sidebar({ isMacOS }: SidebarProps) {
         className="mt-auto flex flex-col items-center gap-1.5 transition-all duration-300"
         style={{ paddingBottom: isPlayerOpen ? '7rem' : undefined }}
       >
-        <span className="text-[10px] text-muted-foreground/80">v{version}</span>
+        <span className="text-[10px] text-muted-foreground/80" data-tip="Installed app version">
+          v{version}
+        </span>
         {updateStatus.available && (
           <Link
             to="/settings"

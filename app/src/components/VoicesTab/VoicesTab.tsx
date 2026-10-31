@@ -1,11 +1,9 @@
-import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Mic, Plus, Search, Sparkles } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 
-import { MultiSelect } from '@/components/ui/multi-select';
 import {
   Table,
   TableBody,
@@ -15,7 +13,6 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { ProfileForm } from '@/components/VoiceProfiles/ProfileForm';
-import { apiClient } from '@/lib/api/client';
 import type { VoiceProfileResponse } from '@/lib/api/types';
 import { BOTTOM_SAFE_AREA_PADDING } from '@/lib/constants/ui';
 import { useProfiles } from '@/lib/hooks/useProfiles';
@@ -28,7 +25,6 @@ import { VoiceInspector } from './VoiceInspector';
 export function VoicesTab() {
   const { t } = useTranslation();
   const { data: profiles, isLoading } = useProfiles();
-  const queryClient = useQueryClient();
   const setDialogOpen = useUIStore((state) => state.setProfileDialogOpen);
   const selectedVoiceId = useUIStore((state) => state.selectedVoiceId);
   const setSelectedVoiceId = useUIStore((state) => state.setSelectedVoiceId);
@@ -60,40 +56,6 @@ export function VoicesTab() {
     }
   }, [profiles, selectedVoiceId, setSelectedVoiceId]);
 
-  // Get channel assignments for each profile
-  const { data: channelAssignments } = useQuery({
-    queryKey: ['profile-channels'],
-    queryFn: async () => {
-      if (!profiles) return {};
-      const assignments: Record<string, string[]> = {};
-      for (const profile of profiles) {
-        try {
-          const result = await apiClient.getProfileChannels(profile.id);
-          assignments[profile.id] = result.channel_ids;
-        } catch {
-          assignments[profile.id] = [];
-        }
-      }
-      return assignments;
-    },
-    enabled: !!profiles,
-  });
-
-  // Get all channels
-  const { data: channels } = useQuery({
-    queryKey: ['channels'],
-    queryFn: () => apiClient.listChannels(),
-  });
-
-  const handleChannelChange = async (profileId: string, channelIds: string[]) => {
-    try {
-      await apiClient.setProfileChannels(profileId, channelIds);
-      queryClient.invalidateQueries({ queryKey: ['profile-channels'] });
-    } catch (error) {
-      console.error('Failed to update channels:', error);
-    }
-  };
-
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-full">
@@ -121,9 +83,13 @@ export function VoicesTab() {
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 className="h-10 pl-8 text-sm rounded-full focus-visible:ring-0 focus-visible:ring-offset-0"
+                data-tip="Filter voices by name, description, or language"
               />
             </div>
-            <Button onClick={() => setDialogOpen(true)}>
+            <Button
+              onClick={() => setDialogOpen(true)}
+              data-tip="Create a voice profile by cloning a recording or uploading samples"
+            >
               <Plus className="h-4 w-4 mr-2" />
               {t('voicesTab.newVoice')}
             </Button>
@@ -141,12 +107,27 @@ export function VoicesTab() {
           <Table className="table-fixed [&_td:first-child]:pl-8 [&_th:first-child]:pl-8">
             <TableHeader>
               <TableRow>
-                <TableHead className="w-[30%]">{t('voicesTab.columns.name')}</TableHead>
-                <TableHead className="w-[10%]">{t('voicesTab.columns.language')}</TableHead>
-                <TableHead className="w-[10%]">{t('voicesTab.columns.generations')}</TableHead>
-                <TableHead className="w-[8%]">{t('voicesTab.columns.samples')}</TableHead>
-                <TableHead className="w-[8%]">{t('voicesTab.columns.effects')}</TableHead>
-                <TableHead className="w-[24%]">{t('voicesTab.columns.channels')}</TableHead>
+                <TableHead className="w-[40%]" data-tip="Profile name and description">
+                  {t('voicesTab.columns.name')}
+                </TableHead>
+                <TableHead className="w-[13%]" data-tip="Language the voice speaks when generating">
+                  {t('voicesTab.columns.language')}
+                </TableHead>
+                <TableHead className="w-[15%]" data-tip="Speech clips generated with this voice">
+                  {t('voicesTab.columns.generations')}
+                </TableHead>
+                <TableHead
+                  className="w-[13%]"
+                  data-tip="Reference recordings the voice is cloned from. Speech to Speech needs at least one."
+                >
+                  {t('voicesTab.columns.samples')}
+                </TableHead>
+                <TableHead
+                  className="w-[13%]"
+                  data-tip="Audio effects applied automatically to this voice's output"
+                >
+                  {t('voicesTab.columns.effects')}
+                </TableHead>
                 <TableHead className="w-6"></TableHead>
               </TableRow>
             </TableHeader>
@@ -157,9 +138,6 @@ export function VoicesTab() {
                   profile={profile}
                   isSelected={selectedVoiceId === profile.id}
                   onSelect={() => setSelectedVoiceId(profile.id)}
-                  channelIds={channelAssignments?.[profile.id] || []}
-                  channels={channels || []}
-                  onChannelChange={(channelIds) => handleChannelChange(profile.id, channelIds)}
                 />
               ))}
             </TableBody>
@@ -183,19 +161,9 @@ interface VoiceRowProps {
   profile: VoiceProfileResponse;
   isSelected: boolean;
   onSelect: () => void;
-  channelIds: string[];
-  channels: Array<{ id: string; name: string; is_default: boolean }>;
-  onChannelChange: (channelIds: string[]) => void;
 }
 
-function VoiceRow({
-  profile,
-  isSelected,
-  onSelect,
-  channelIds,
-  channels,
-  onChannelChange,
-}: VoiceRowProps) {
+function VoiceRow({ profile, isSelected, onSelect }: VoiceRowProps) {
   const { t } = useTranslation();
   const serverUrl = useServerStore((state) => state.serverUrl);
   const [avatarError, setAvatarError] = useState(false);
@@ -238,7 +206,7 @@ function VoiceRow({
         {enabledEffects.length > 0 ? (
           <span
             className="inline-flex items-center gap-1 text-xs text-accent"
-            title={effectsSummary}
+            title={`Effects chain: ${effectsSummary}`}
           >
             <Sparkles className="h-3 w-3 fill-accent" />
             {enabledEffects.length}
@@ -246,18 +214,6 @@ function VoiceRow({
         ) : (
           <span className="text-xs text-muted-foreground">—</span>
         )}
-      </TableCell>
-      <TableCell onClick={(e) => e.stopPropagation()}>
-        <MultiSelect
-          options={channels.map((ch) => ({
-            value: ch.id,
-            label: ch.is_default ? t('voicesTab.channelDefaultLabel', { name: ch.name }) : ch.name,
-          }))}
-          value={channelIds}
-          onChange={onChannelChange}
-          placeholder={t('voicesTab.selectChannels')}
-          className="w-full"
-        />
       </TableCell>
       <TableCell />
     </TableRow>

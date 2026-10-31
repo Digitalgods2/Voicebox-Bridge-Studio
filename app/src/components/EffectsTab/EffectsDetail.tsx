@@ -281,6 +281,7 @@ export function EffectsDetail() {
                 size="sm"
                 className="h-8 text-destructive  gap-1.5"
                 onClick={handleDelete}
+                data-tip="Delete this preset. Voices using it keep their own copy of the chain."
                 disabled={deleting}
               >
                 <Trash2 className="h-3.5 w-3.5" />
@@ -290,6 +291,7 @@ export function EffectsDetail() {
                 size="sm"
                 className="h-8 gap-1.5"
                 onClick={handleSaveExisting}
+                data-tip="Save changes to this preset"
                 disabled={saving || workingChain.length === 0}
               >
                 <Save className="h-3.5 w-3.5" />
@@ -302,6 +304,7 @@ export function EffectsDetail() {
               size="sm"
               className="h-8 gap-1.5"
               onClick={handleSaveNew}
+              data-tip="Save this chain as a new preset"
               disabled={saving || workingChain.length === 0}
             >
               <Save className="h-3.5 w-3.5" />
@@ -314,6 +317,7 @@ export function EffectsDetail() {
               variant="outline"
               className="h-8 gap-1.5"
               onClick={handleSaveAsNew}
+              data-tip="Built-in presets can't be changed; save your edits as a new custom preset"
               disabled={saving}
             >
               <Save className="h-3.5 w-3.5" />
@@ -356,7 +360,12 @@ export function EffectsDetail() {
         <Separator />
 
         <div className="space-y-3">
-          <Label className="text-xs">{t('effects.preview.label')}</Label>
+          <Label
+            className="text-xs"
+            data-tip="Pick an existing generation to audition the effect chain on"
+          >
+            {t('effects.preview.label')}
+          </Label>
           <div className="flex items-center gap-2">
             <GenerationPicker
               selectedId={previewGenId}
@@ -368,6 +377,7 @@ export function EffectsDetail() {
               size="sm"
               className="h-8 gap-1.5 shrink-0"
               onClick={handlePreview}
+              data-tip="Hear the chosen generation with this chain applied. Nothing is saved."
               disabled={!previewGenId || workingChain.length === 0 || previewLoading}
             >
               {previewLoading ? (

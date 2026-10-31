@@ -320,6 +320,7 @@ export function SampleList({ profileId }: SampleListProps) {
         variant="outline"
         className="w-full"
         onClick={() => setUploadOpen(true)}
+        data-tip="Add another reference recording to this voice. More clean samples can improve the clone."
       >
         <Plus className="mr-2 h-4 w-4" />
         {t('sampleList.addSample')}

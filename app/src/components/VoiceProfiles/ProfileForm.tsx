@@ -885,6 +885,7 @@ export function ProfileForm() {
                   variant="ghost"
                   size="sm"
                   className="h-6 px-2 text-xs text-muted-foreground"
+                  data-tip="Discard the restored draft and start with an empty form"
                   onClick={() => {
                     setProfileFormDraft(null);
                     form.reset({
@@ -920,6 +921,7 @@ export function ProfileForm() {
                           <button
                             type="button"
                             onClick={() => setVoiceSource('clone')}
+                            data-tip="Clone a voice from a recording: upload a file, record your microphone, or capture system audio"
                             className={`inline-flex items-center gap-2 px-3 py-1.5 text-sm rounded-md transition-colors ${
                               voiceSource === 'clone'
                                 ? 'bg-accent text-accent-foreground shadow-sm'
@@ -932,6 +934,7 @@ export function ProfileForm() {
                           <button
                             type="button"
                             onClick={() => setVoiceSource('builtin')}
+                            data-tip="Use one of a model's built-in preset voices. Preset voices can't be used for Speech to Speech."
                             className={`inline-flex items-center gap-2 px-3 py-1.5 text-sm rounded-md transition-colors ${
                               voiceSource === 'builtin'
                                 ? 'bg-accent text-accent-foreground shadow-sm'
@@ -944,6 +947,7 @@ export function ProfileForm() {
                           <button
                             type="button"
                             onClick={() => setVoiceSource('design')}
+                            data-tip="Create a new voice from a written description. Designed voices can't be used for Speech to Speech."
                             className={`inline-flex items-center gap-2 px-3 py-1.5 text-sm rounded-md transition-colors ${
                               voiceSource === 'design'
                                 ? 'bg-accent text-accent-foreground shadow-sm'
@@ -961,7 +965,7 @@ export function ProfileForm() {
                           <FormDescription>{t('profileForm.design.hint')}</FormDescription>
 
                           <FormItem>
-                            <FormLabel>{t('profileForm.fields.designPrompt')}</FormLabel>
+                            <FormLabel data-tip="Describe the voice to create, such as age, gender, accent, and tone">{t('profileForm.fields.designPrompt')}</FormLabel>
                             <FormControl>
                               <Textarea
                                 value={designPrompt}
@@ -987,7 +991,7 @@ export function ProfileForm() {
                           <FormDescription>{t('profileForm.builtin.hint')}</FormDescription>
 
                           <FormItem>
-                            <FormLabel>{t('profileForm.fields.engine')}</FormLabel>
+                            <FormLabel data-tip="Model that provides the built-in voices">{t('profileForm.fields.engine')}</FormLabel>
                             <Select
                               value={selectedPresetEngine}
                               onValueChange={setSelectedPresetEngine}
@@ -1006,7 +1010,7 @@ export function ProfileForm() {
 
                           {/* Voice picker */}
                           <FormItem>
-                            <FormLabel>{t('profileForm.fields.voice')}</FormLabel>
+                            <FormLabel data-tip="Pick a built-in voice">{t('profileForm.fields.voice')}</FormLabel>
                             <div className="grid grid-cols-2 gap-1.5 max-h-[340px] overflow-y-auto pr-1">
                               {presetVoices.map((voice: PresetVoice) => (
                                 <button
@@ -1059,16 +1063,28 @@ export function ProfileForm() {
                             <TabsList
                               className={`grid w-full ${platform.metadata.isTauri && isSystemAudioSupported ? 'grid-cols-3' : 'grid-cols-2'}`}
                             >
-                              <TabsTrigger value="upload" className="flex items-center gap-2">
+                              <TabsTrigger
+                                value="upload"
+                                className="flex items-center gap-2"
+                                data-tip="Upload an audio file of the voice. A clean 15–30 second single-speaker clip works best."
+                              >
                                 <Upload className="h-4 w-4 shrink-0" />
                                 {t('profileForm.sampleTabs.upload')}
                               </TabsTrigger>
-                              <TabsTrigger value="record" className="flex items-center gap-2">
+                              <TabsTrigger
+                                value="record"
+                                className="flex items-center gap-2"
+                                data-tip="Record the voice with your microphone"
+                              >
                                 <Mic className="h-4 w-4 shrink-0" />
                                 {t('profileForm.sampleTabs.record')}
                               </TabsTrigger>
                               {platform.metadata.isTauri && isSystemAudioSupported && (
-                                <TabsTrigger value="system" className="flex items-center gap-2">
+                                <TabsTrigger
+                                  value="system"
+                                  className="flex items-center gap-2"
+                                  data-tip="Capture audio playing on this computer, such as a video"
+                                >
                                   <Monitor className="h-4 w-4 shrink-0" />
                                   {t('profileForm.sampleTabs.system')}
                                 </TabsTrigger>
@@ -1148,7 +1164,7 @@ export function ProfileForm() {
                             name="referenceText"
                             render={({ field }) => (
                               <FormItem>
-                                <FormLabel>{t('profileForm.fields.referenceText')}</FormLabel>
+                                <FormLabel data-tip="The exact words spoken in the sample. Accurate text gives a better clone.">{t('profileForm.fields.referenceText')}</FormLabel>
                                 <FormControl>
                                   <Textarea
                                     placeholder={t('profileForm.fields.referenceTextPlaceholder')}
@@ -1253,6 +1269,7 @@ export function ProfileForm() {
                               <button
                                 type="button"
                                 onClick={() => avatarInputRef.current?.click()}
+                                data-tip="Choose a picture for this voice"
                                 className="absolute inset-0 rounded-full bg-accent/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center cursor-pointer"
                               >
                                 <Edit2 className="h-6 w-6 text-accent-foreground" />
@@ -1261,6 +1278,7 @@ export function ProfileForm() {
                                 <button
                                   type="button"
                                   onClick={handleRemoveAvatar}
+                                  data-tip="Remove the picture"
                                   disabled={deleteAvatar.isPending}
                                   className="absolute bottom-0 right-0 h-6 w-6 rounded-full bg-background/60 backdrop-blur-sm text-muted-foreground flex items-center justify-center hover:bg-background/80 hover:text-foreground transition-colors shadow-sm border border-border/50"
                                 >
@@ -1287,7 +1305,7 @@ export function ProfileForm() {
                     name="name"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>{t('profileForm.fields.name')}</FormLabel>
+                        <FormLabel data-tip="Display name for this voice">{t('profileForm.fields.name')}</FormLabel>
                         <FormControl>
                           <Input placeholder={t('profileForm.fields.namePlaceholder')} {...field} />
                         </FormControl>
@@ -1301,7 +1319,7 @@ export function ProfileForm() {
                     name="description"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>{t('profileForm.fields.descriptionLabel')}</FormLabel>
+                        <FormLabel data-tip="Short note shown under the name, such as the source or style">{t('profileForm.fields.descriptionLabel')}</FormLabel>
                         <FormControl>
                           <Textarea
                             placeholder={t('profileForm.fields.descriptionPlaceholder')}
@@ -1318,7 +1336,7 @@ export function ProfileForm() {
                     name="personality"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>{t('profileForm.fields.personalityLabel')}</FormLabel>
+                        <FormLabel data-tip="Who this voice is and how they talk. Powers the Compose and Speak in character buttons on the Generate page.">{t('profileForm.fields.personalityLabel')}</FormLabel>
                         <FormControl>
                           <Textarea
                             placeholder={t('profileForm.fields.personalityPlaceholder')}
@@ -1339,7 +1357,7 @@ export function ProfileForm() {
                     name="language"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>{t('profileForm.fields.language')}</FormLabel>
+                        <FormLabel data-tip="Language this voice speaks by default when generating">{t('profileForm.fields.language')}</FormLabel>
                         <Select onValueChange={field.onChange} defaultValue={field.value}>
                           <FormControl>
                             <SelectTrigger>
@@ -1360,7 +1378,7 @@ export function ProfileForm() {
                   />
 
                   <FormItem>
-                    <FormLabel>{t('profileForm.fields.defaultEngine')}</FormLabel>
+                    <FormLabel data-tip="Model selected automatically when you choose this voice">{t('profileForm.fields.defaultEngine')}</FormLabel>
                     <Select
                       value={defaultEngine || '_none'}
                       onValueChange={(v) => {
@@ -1396,7 +1414,7 @@ export function ProfileForm() {
 
                   {editingProfileId && (
                     <div className="space-y-2">
-                      <FormLabel>{t('profileForm.fields.defaultEffects')}</FormLabel>
+                      <FormLabel data-tip="Effects applied automatically to every new generation with this voice">{t('profileForm.fields.defaultEffects')}</FormLabel>
                       <p className="text-xs text-muted-foreground">
                         {t('profileForm.fields.defaultEffectsHint')}
                       </p>

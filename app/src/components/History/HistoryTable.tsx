@@ -456,6 +456,7 @@ export function HistoryTable() {
                 className="h-7 text-xs text-muted-foreground"
                 onClick={() => setClearFailedDialogOpen(true)}
                 disabled={clearFailed.isPending}
+                data-tip="Remove every failed generation from the history (asks first)"
               >
                 <Trash2 className="h-3 w-3 mr-1.5" />
                 {clearFailed.isPending ? 'Clearing...' : 'Clear failed'}
@@ -602,6 +603,7 @@ export function HistoryTable() {
                             isVersionsExpanded && 'text-accent hover:text-accent',
                           )}
                           aria-label="Toggle versions"
+                          data-tip="Show this clip's versions: the original and any effect variants"
                           onClick={() => setExpandedVersionsId(isVersionsExpanded ? null : gen.id)}
                         >
                           <AudioLines className="h-2 w-2" />
@@ -734,6 +736,7 @@ export function HistoryTable() {
                                   key={v.id}
                                   type="button"
                                   className="flex items-center gap-2 w-full h-9 px-3 text-left hover:bg-muted/50 transition-colors"
+                                  data-tip="Play this version and make it the clip's default"
                                   onClick={() => {
                                     handlePlayVersion(gen.id, v.id, gen.text, gen.profile_id);
                                     if (!v.is_default) {

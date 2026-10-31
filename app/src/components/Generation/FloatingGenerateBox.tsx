@@ -370,7 +370,7 @@ export function FloatingGenerateBox({
                       exit={{ opacity: 0, scale: 0.8 }}
                       transition={{ duration: 0.2 }}
                     >
-                      <div className="group relative">
+                      <div className="group relative" data-tip={t('generation.compose.tooltip')}>
                         <Button
                           type="button"
                           variant="ghost"
@@ -390,9 +390,6 @@ export function FloatingGenerateBox({
                             <Dices className="h-4 w-4" />
                           )}
                         </Button>
-                        <span className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-2 whitespace-nowrap rounded-md bg-popover px-3 py-1.5 text-xs text-popover-foreground border border-accent/25 opacity-0 transition-opacity group-hover:opacity-100 z-[9999]">
-                          {t('generation.compose.tooltip')}
-                        </span>
                       </div>
                     </motion.div>
                   )}
@@ -415,7 +412,9 @@ export function FloatingGenerateBox({
                           return (
                             <FormItem className="space-y-0">
                               <FormControl>
-                                <div className="group relative">
+                                <div className="group relative" data-tip={active
+                                      ? t('generation.persona.tooltipActive')
+                                      : t('generation.persona.tooltipInactive')}>
                                   <Button
                                     type="button"
                                     variant="ghost"
@@ -436,11 +435,6 @@ export function FloatingGenerateBox({
                                   >
                                     <Wand2 className="h-4 w-4" />
                                   </Button>
-                                  <span className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-2 whitespace-nowrap rounded-md bg-popover px-3 py-1.5 text-xs text-popover-foreground border border-accent/25 opacity-0 transition-opacity group-hover:opacity-100 z-[9999]">
-                                    {active
-                                      ? t('generation.persona.tooltipActive')
-                                      : t('generation.persona.tooltipInactive')}
-                                  </span>
                                 </div>
                               </FormControl>
                             </FormItem>
@@ -460,7 +454,7 @@ export function FloatingGenerateBox({
                       exit={{ opacity: 0, scale: 0.8 }}
                       transition={{ duration: 0.2 }}
                     >
-                      <div className="group relative">
+                      <div className="group relative" data-tip={t('generation.instruct.tooltip')}>
                         <Button
                           type="button"
                           variant="ghost"
@@ -481,15 +475,16 @@ export function FloatingGenerateBox({
                         >
                           <SlidersHorizontal className="h-4 w-4" />
                         </Button>
-                        <span className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-2 whitespace-nowrap rounded-md bg-popover px-3 py-1.5 text-xs text-popover-foreground border border-accent/25 opacity-0 transition-opacity group-hover:opacity-100 z-[9999]">
-                          {t('generation.instruct.tooltip')}
-                        </span>
                       </div>
                     </motion.div>
                   )}
                 </AnimatePresence>
 
-                <div className="group relative">
+                <div className="group relative" data-tip={isPending
+                      ? t('generation.button.generating')
+                      : !selectedProfileId
+                        ? t('generation.button.selectFirst')
+                        : t('generation.button.generate')}>
                   <Button
                     type="submit"
                     disabled={isPending || !selectedProfileId}
@@ -509,13 +504,6 @@ export function FloatingGenerateBox({
                       <Sparkles className="h-4 w-4" />
                     )}
                   </Button>
-                  <span className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-2 whitespace-nowrap rounded-md bg-popover px-3 py-1.5 text-xs text-popover-foreground border border-accent/25 opacity-0 transition-opacity group-hover:opacity-100 z-[9999]">
-                    {isPending
-                      ? t('generation.button.generating')
-                      : !selectedProfileId
-                        ? t('generation.button.selectFirst')
-                        : t('generation.button.generate')}
-                  </span>
                 </div>
               </div>
             </div>
@@ -571,7 +559,10 @@ export function FloatingGenerateBox({
                         value={selectedProfileId || ''}
                         onValueChange={(value) => setSelectedProfileId(value || null)}
                       >
-                        <SelectTrigger className="h-8 text-xs bg-card border-border rounded-full hover:bg-background/50 transition-all w-full">
+                        <SelectTrigger
+                          className="h-8 text-xs bg-card border-border rounded-full hover:bg-background/50 transition-all w-full"
+                          data-tip="Voice that speaks the text"
+                        >
                           <SelectValue placeholder={t('generation.voiceSelector.placeholder')} />
                         </SelectTrigger>
                         <SelectContent side="top">
@@ -596,7 +587,10 @@ export function FloatingGenerateBox({
                         <FormItem className="flex-1 space-y-0">
                           <Select onValueChange={field.onChange} value={field.value}>
                             <FormControl>
-                              <SelectTrigger className="h-8 text-xs bg-card border-border rounded-full hover:bg-background/50 transition-all">
+                              <SelectTrigger
+                                className="h-8 text-xs bg-card border-border rounded-full hover:bg-background/50 transition-all"
+                                data-tip="Language of the text. The list depends on the selected model."
+                              >
                                 <SelectValue />
                               </SelectTrigger>
                             </FormControl>
@@ -625,7 +619,10 @@ export function FloatingGenerateBox({
                         setSelectedPresetId(value === 'none' ? null : value)
                       }
                     >
-                      <SelectTrigger className="h-8 text-xs bg-card border-border rounded-full hover:bg-background/50 transition-all">
+                      <SelectTrigger
+                        className="h-8 text-xs bg-card border-border rounded-full hover:bg-background/50 transition-all"
+                        data-tip="Effects applied to this generation: none, the voice's own effects, or a saved preset"
+                      >
                         <SelectValue placeholder={t('generation.effects.none')} />
                       </SelectTrigger>
                       <SelectContent side="top">

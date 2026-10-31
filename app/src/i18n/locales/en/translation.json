@@ -717,7 +717,7 @@
     "instruct": {
       "show": "Show delivery instructions",
       "hide": "Hide delivery instructions",
-      "tooltip": "Delivery instructions (tone, emotion, pace)",
+      "tooltip": "Delivery instructions: describe tone, emotion, or pace for this generation",
       "placeholder": "Delivery instructions — e.g. Speak slowly with warmth, Authoritative and clear…",
       "placeholderOmnivoice": "Voice attributes, comma-separated — e.g. female, low pitch, british accent (fixed vocabulary: gender, age, pitch, whisper, accent)"
     },
@@ -729,14 +729,14 @@
       "profileDefault": "Profile default"
     },
     "compose": {
-      "tooltip": "Compose",
+      "tooltip": "Compose: write a new line in this voice's personality",
       "ariaLabel": "Compose a line in character",
       "failedTitle": "Compose failed",
       "failedDescription": "Could not generate text from this personality."
     },
     "persona": {
-      "tooltipActive": "Speaking in character",
-      "tooltipInactive": "Speak in character",
+      "tooltipActive": "Speaking in character: your text is rewritten in this voice's personality before it is spoken. Click to turn off.",
+      "tooltipInactive": "Speak in character: rewrite your text in this voice's personality before speaking",
       "ariaLabelActive": "Speaking in character",
       "ariaLabelInactive": "Speak in character"
     }

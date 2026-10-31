@@ -18,17 +18,52 @@ interface SettingsTab {
     | '/settings/changelog'
     | '/settings/about';
   tauriOnly?: boolean;
+  tip: string;
 }
 
 const tabs: SettingsTab[] = [
-  { labelKey: 'settings.tabs.general', path: '/settings' },
-  { labelKey: 'settings.tabs.generation', path: '/settings/generation' },
-  { labelKey: 'settings.tabs.captures', path: '/settings/captures' },
-  { labelKey: 'settings.tabs.mcp', path: '/settings/mcp' },
-  { labelKey: 'settings.tabs.gpu', path: '/settings/gpu', tauriOnly: true },
-  { labelKey: 'settings.tabs.logs', path: '/settings/logs', tauriOnly: true },
-  { labelKey: 'settings.tabs.changelog', path: '/settings/changelog' },
-  { labelKey: 'settings.tabs.about', path: '/settings/about' },
+  {
+    labelKey: 'settings.tabs.general',
+    path: '/settings',
+    tip: 'Server connection, language, and general app behaviour',
+  },
+  {
+    labelKey: 'settings.tabs.generation',
+    path: '/settings/generation',
+    tip: 'Defaults for text-to-speech generation',
+  },
+  {
+    labelKey: 'settings.tabs.captures',
+    path: '/settings/captures',
+    tip: 'Recording, dictation, transcription, and capture storage',
+  },
+  {
+    labelKey: 'settings.tabs.mcp',
+    path: '/settings/mcp',
+    tip: 'Let local AI assistants speak through your voices over MCP',
+  },
+  {
+    labelKey: 'settings.tabs.gpu',
+    path: '/settings/gpu',
+    tauriOnly: true,
+    tip: 'GPU acceleration for faster generation',
+  },
+  {
+    labelKey: 'settings.tabs.logs',
+    path: '/settings/logs',
+    tauriOnly: true,
+    tip: 'Backend server logs for troubleshooting',
+  },
+  {
+    labelKey: 'settings.tabs.changelog',
+    path: '/settings/changelog',
+    tip: 'What changed in each VoiceBox release',
+  },
+  {
+    labelKey: 'settings.tabs.about',
+    path: '/settings/about',
+    tip: 'About VoiceBox Bridge Studio, credits, and license',
+  },
 ];
 
 export function SettingsLayout() {
@@ -53,6 +88,7 @@ export function SettingsLayout() {
             <Link
               key={tab.path}
               to={tab.path}
+              data-tip={tab.tip}
               className={cn(
                 'px-4 py-2 text-sm font-medium transition-colors border-b-2 -mb-px',
                 isActive

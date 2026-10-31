@@ -238,6 +238,7 @@ export function VoiceInspector({ profileId }: VoiceInspectorProps) {
                 <button
                   type="button"
                   onClick={() => avatarInputRef.current?.click()}
+                  data-tip="Change this voice's picture"
                   className="absolute inset-0 rounded-full bg-accent/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center cursor-pointer"
                 >
                   <Edit2 className="h-5 w-5 text-accent-foreground" />
@@ -246,6 +247,7 @@ export function VoiceInspector({ profileId }: VoiceInspectorProps) {
                   <button
                     type="button"
                     onClick={handleRemoveAvatar}
+                    data-tip="Remove the picture"
                     disabled={deleteAvatar.isPending}
                     className="absolute bottom-0 right-0 h-5 w-5 rounded-full bg-background/60 backdrop-blur-sm text-muted-foreground flex items-center justify-center hover:bg-background/80 hover:text-foreground transition-colors shadow-sm border border-border/50"
                   >
@@ -269,7 +271,7 @@ export function VoiceInspector({ profileId }: VoiceInspectorProps) {
                 name="name"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>{t('profileForm.fields.name')}</FormLabel>
+                    <FormLabel data-tip="Display name for this voice">{t('profileForm.fields.name')}</FormLabel>
                     <FormControl>
                       <Input placeholder={t('profileForm.fields.namePlaceholder')} {...field} />
                     </FormControl>
@@ -283,7 +285,7 @@ export function VoiceInspector({ profileId }: VoiceInspectorProps) {
                 name="description"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>{t('voiceInspector.fields.description')}</FormLabel>
+                    <FormLabel data-tip="Short note shown under the name, such as the source or style">{t('voiceInspector.fields.description')}</FormLabel>
                     <FormControl>
                       <Textarea
                         placeholder={t('profileForm.fields.descriptionPlaceholder')}
@@ -301,7 +303,7 @@ export function VoiceInspector({ profileId }: VoiceInspectorProps) {
                 name="language"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>{t('profileForm.fields.language')}</FormLabel>
+                    <FormLabel data-tip="Language this voice speaks by default when generating">{t('profileForm.fields.language')}</FormLabel>
                     <Select onValueChange={field.onChange} value={field.value}>
                       <FormControl>
                         <SelectTrigger>
@@ -323,7 +325,7 @@ export function VoiceInspector({ profileId }: VoiceInspectorProps) {
 
               {/* Effects */}
               <div className="space-y-2">
-                <FormLabel>{t('profileForm.fields.defaultEffects')}</FormLabel>
+                <FormLabel data-tip="Effects applied automatically to every new generation with this voice">{t('profileForm.fields.defaultEffects')}</FormLabel>
                 <p className="text-xs text-muted-foreground">
                   {t('voiceInspector.defaultEffectsHint')}
                 </p>

@@ -153,7 +153,10 @@ export function VoiceChangerTab() {
       <div className="flex-1 min-h-0 overflow-y-auto pb-8">
         <div className="grid gap-6 lg:grid-cols-[360px_1fr]">
           <section className="space-y-5 rounded-xl border border-accent/20 bg-card/70 p-5 h-fit shadow-[0_12px_40px_-20px_rgba(0,0,0,0.9)]">
-            <div className="space-y-2">
+            <div
+              className="space-y-2"
+              data-tip="The workspace voice the source speech is converted into. Voices without reference samples can't be used."
+            >
               <Label>Target voice</Label>
               <Select value={profileId} onValueChange={setProfileId}>
                 <SelectTrigger>
@@ -174,7 +177,10 @@ export function VoiceChangerTab() {
             </div>
 
             {profileId && (samples.data?.length ?? 0) > 1 && (
-              <div className="space-y-2">
+              <div
+                className="space-y-2"
+                data-tip="Which of this voice's recordings to match. A clean 15–30 second single-speaker sample works best."
+              >
                 <Label>Reference sample</Label>
                 <Select value={sampleId} onValueChange={setSampleId}>
                   <SelectTrigger>
@@ -193,13 +199,19 @@ export function VoiceChangerTab() {
 
             {sampleId && (
               <div className="space-y-2">
-                <Label className="text-xs text-muted-foreground">Reference</Label>
+                <Label
+                  className="text-xs text-muted-foreground"
+                  data-tip="Play the selected reference sample to check it"
+                >
+                  Reference
+                </Label>
                 <MediaPreview kind="audio" src={apiClient.getSampleUrl(sampleId)} className="h-9" />
               </div>
             )}
 
             <AdjustmentSlider
               label="Voice similarity (tau)"
+              tip="OpenVoice's conversion randomness. Lower is steadier and closer to the source delivery; higher varies more. Default 0.30."
               value={adjustments.tau}
               min={0}
               max={1}
@@ -209,6 +221,7 @@ export function VoiceChangerTab() {
             />
             <AdjustmentSlider
               label="Pitch correction"
+              tip="Shift the converted voice up or down in semitones without changing speed or timing. Small steps (0.5–2) sound most natural."
               value={adjustments.pitch_semitones}
               min={-6}
               max={6}
@@ -218,6 +231,7 @@ export function VoiceChangerTab() {
             />
             <AdjustmentSlider
               label="Tone (deeper ↔ brighter)"
+              tip="A high-shelf EQ at 2.5 kHz: negative sounds deeper and warmer, positive brighter. Timing is unchanged."
               value={adjustments.brightness_db}
               min={-6}
               max={6}
@@ -234,6 +248,7 @@ export function VoiceChangerTab() {
             <label
               htmlFor="sts-authorized"
               className="flex items-start gap-2 text-sm cursor-pointer"
+              data-tip="Required before converting. Only use media and voices you own or have permission to use."
             >
               <Checkbox
                 id="sts-authorized"
@@ -248,13 +263,25 @@ export function VoiceChangerTab() {
           <section className="rounded-xl border border-accent/20 bg-card/70 p-5 min-w-0 shadow-[0_12px_40px_-20px_rgba(0,0,0,0.9)]">
             <Tabs defaultValue="audio">
               <TabsList>
-                <TabsTrigger value="audio" className="gap-1.5">
+                <TabsTrigger
+                  value="audio"
+                  className="gap-1.5"
+                  data-tip="Convert an audio file (WAV, MP3, FLAC, M4A, AAC, OGG, OPUS, WMA)"
+                >
                   <FileAudio className="h-4 w-4" /> Audio file
                 </TabsTrigger>
-                <TabsTrigger value="video" className="gap-1.5">
+                <TabsTrigger
+                  value="video"
+                  className="gap-1.5"
+                  data-tip="Convert the speech in a video from this PC; the picture is copied unchanged"
+                >
                   <FileVideo className="h-4 w-4" /> Video file
                 </TabsTrigger>
-                <TabsTrigger value="youtube" className="gap-1.5">
+                <TabsTrigger
+                  value="youtube"
+                  className="gap-1.5"
+                  data-tip="Download a YouTube video you have rights to and convert its speech"
+                >
                   <Youtube className="h-4 w-4" /> YouTube
                 </TabsTrigger>
               </TabsList>
@@ -311,6 +338,7 @@ function EngineNotice({
 
 function AdjustmentSlider(props: {
   label: string;
+  tip: string;
   value: number;
   min: number;
   max: number;
@@ -319,7 +347,7 @@ function AdjustmentSlider(props: {
   onChange: (value: number) => void;
 }) {
   return (
-    <div className="space-y-2">
+    <div className="space-y-2" data-tip={props.tip}>
       <div className="flex items-center justify-between">
         <Label>{props.label}</Label>
         <span className="text-xs font-mono text-muted-foreground">{props.format(props.value)}</span>
@@ -338,6 +366,7 @@ function AdjustmentSlider(props: {
 function FilePicker(props: {
   accept: string;
   label: string;
+  tip?: string;
   onFile: (file: File) => void;
   disabled?: boolean;
 }) {
@@ -346,6 +375,7 @@ function FilePicker(props: {
       type="file"
       accept={props.accept}
       aria-label={props.label}
+      data-tip={props.tip ?? `Choose the ${props.label.toLowerCase()} to convert`}
       disabled={props.disabled}
       onChange={(event) => {
         const file = event.target.files?.[0];
@@ -360,7 +390,10 @@ function OutputFormatSelect(props: {
   onChange: (value: STSOutputFormat) => void;
 }) {
   return (
-    <div className="flex items-center gap-2">
+    <div
+      className="flex items-center gap-2"
+      data-tip="MKV keeps the converted audio lossless (FLAC). MP4 uses AAC audio and plays almost everywhere. The video stream is copied either way."
+    >
       <Label className="shrink-0">Output</Label>
       <Select value={props.value} onValueChange={(v) => props.onChange(v as STSOutputFormat)}>
         <SelectTrigger className="w-56">
@@ -384,7 +417,15 @@ function ConvertBar(props: {
   const hint = props.blocker ?? (props.ready ? null : 'Choose a source first.');
   return (
     <div className="flex items-center gap-3">
-      <Button onClick={props.onConvert} disabled={!!hint || props.busy}>
+      <Button
+        onClick={props.onConvert}
+        disabled={!!hint || props.busy}
+        data-tip={
+          props.busy
+            ? 'Conversion in progress'
+            : (hint ?? 'Convert the source into the target voice, keeping its timing')
+        }
+      >
         {props.busy && <Loader2 className="h-4 w-4 animate-spin" />}
         Convert
       </Button>
@@ -433,7 +474,12 @@ function useFailureToast(title = 'Conversion failed') {
 }
 
 /** Clears a source: removes the upload from the app's storage and resets the picker. */
-function ClearButton(props: { onClear: () => void; disabled?: boolean; pending?: boolean }) {
+function ClearButton(props: {
+  onClear: () => void;
+  disabled?: boolean;
+  pending?: boolean;
+  tip?: string;
+}) {
   return (
     <Button
       variant="outline"
@@ -441,6 +487,10 @@ function ClearButton(props: { onClear: () => void; disabled?: boolean; pending?:
       onClick={props.onClear}
       disabled={props.disabled || props.pending}
       className="shrink-0"
+      data-tip={
+        props.tip ??
+        "Remove this source from the app's storage and pick another. Converted results are kept."
+      }
     >
       {props.pending ? <Loader2 className="h-4 w-4 animate-spin" /> : <X className="h-4 w-4" />}
       Clear
@@ -458,6 +508,7 @@ function DeleteResultButton(props: { what: string; onConfirm: () => void; pendin
           size="sm"
           disabled={props.pending}
           className="text-destructive hover:text-destructive hover:border-destructive/60 hover:bg-destructive/10"
+          data-tip={`Permanently delete this ${props.what} from this computer (asks first)`}
         >
           {props.pending ? (
             <Loader2 className="h-4 w-4 animate-spin" />
@@ -675,7 +726,7 @@ function AudioJobResult({
       <MediaPreview kind="audio" src={url} />
       <div className="flex gap-2">
         <Button variant="outline" size="sm" asChild>
-          <a href={url} download>
+          <a href={url} download data-tip="Save the converted audio as a WAV file">
             <Download className="h-4 w-4" /> Download WAV
           </a>
         </Button>
@@ -798,10 +849,18 @@ function YouTubeWorkflow({ request, blocker }: WorkflowProps) {
         <div className="flex items-center gap-2">
           <Input
             placeholder="https://www.youtube.com/watch?v=…"
+            aria-label="YouTube video URL"
+            data-tip="Paste the link of a single YouTube video you own or have permission to convert"
             value={url}
             onChange={(event) => setUrl(event.target.value)}
           />
-          {url && <ClearButton onClear={() => setUrl('')} disabled={converting} />}
+          {url && (
+            <ClearButton
+              onClear={() => setUrl('')}
+              disabled={converting}
+              tip="Clear the URL. The cached download is kept."
+            />
+          )}
         </div>
         <p className="text-xs text-muted-foreground">
           One video is downloaded and kept locally so reconverting it with another voice needs no
@@ -819,7 +878,12 @@ function YouTubeWorkflow({ request, blocker }: WorkflowProps) {
           <div className="flex shrink-0 gap-1">
             {cache.data.source_media_url && (
               <Button variant="ghost" size="sm" asChild>
-                <a href={stsUrl(cache.data.source_media_url)} download>
+                <a
+                  href={stsUrl(cache.data.source_media_url)}
+                  download
+                  aria-label="Save original download"
+                  data-tip="Save the original, unconverted YouTube download"
+                >
                   <Download className="h-4 w-4" />
                 </a>
               </Button>
@@ -830,6 +894,7 @@ function YouTubeWorkflow({ request, blocker }: WorkflowProps) {
               disabled={clearCache.isPending || converting}
               onClick={() => clearCache.mutate()}
               aria-label="Clear cached download"
+              data-tip="Delete the cached YouTube download. The next conversion downloads again."
             >
               <Trash2 className="h-4 w-4" />
             </Button>
@@ -913,7 +978,7 @@ function VideoJobResult({
       <MediaPreview kind="video" src={url} />
       <div className="flex gap-2">
         <Button variant="outline" size="sm" asChild>
-          <a href={url} download>
+          <a href={url} download data-tip="Save the converted video with its new soundtrack">
             <Download className="h-4 w-4" /> Download {job.output_format.toUpperCase()}
           </a>
         </Button>

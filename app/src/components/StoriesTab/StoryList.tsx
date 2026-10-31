@@ -216,7 +216,11 @@ export function StoryList() {
         <ListPaneTitleRow>
           <ListPaneTitle>{t('stories.title')}</ListPaneTitle>
           <ListPaneActions>
-            <Button onClick={() => setCreateDialogOpen(true)} size="sm">
+            <Button
+              onClick={() => setCreateDialogOpen(true)}
+              size="sm"
+              data-tip="Start a new story: a timeline where you arrange clips from different voices"
+            >
               <Plus className="mr-2 h-4 w-4" />
               {t('stories.newStory')}
             </Button>

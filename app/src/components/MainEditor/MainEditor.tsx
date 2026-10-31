@@ -86,7 +86,11 @@ export function MainEditor() {
           <div className="flex items-center justify-between mb-4 px-1">
             <h2 className="brand-title text-3xl leading-tight">{t('nav.generate')}</h2>
             <div className="flex gap-2">
-              <Button variant="outline" onClick={handleImportClick}>
+              <Button
+                variant="outline"
+                onClick={handleImportClick}
+                data-tip="Import a voice profile exported from VoiceBox (.voicebox.zip)"
+              >
                 <Upload className="mr-2 h-4 w-4" />
                 {t('main.importVoice')}
               </Button>
@@ -97,7 +101,10 @@ export function MainEditor() {
                 onChange={handleFileChange}
                 className="hidden"
               />
-              <Button onClick={() => setDialogOpen(true)}>
+              <Button
+                onClick={() => setDialogOpen(true)}
+                data-tip="Create a voice profile by cloning a recording or uploading samples"
+              >
                 <Sparkles className="mr-2 h-4 w-4" />
                 {t('main.createVoice')}
               </Button>

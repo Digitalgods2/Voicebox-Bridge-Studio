@@ -149,7 +149,10 @@ export function EngineModelSelector({ form, compact, selectedProfile }: EngineMo
   return (
     <Select value={selectValue} onValueChange={(v) => applyEngineSelection(form, v)}>
       <FormControl>
-        <SelectTrigger className={triggerClass}>
+        <SelectTrigger
+          className={triggerClass}
+          data-tip="Speech model used to generate. Only downloaded models can run; manage them on the Models page."
+        >
           <SelectValue />
         </SelectTrigger>
       </FormControl>

@@ -137,6 +137,7 @@ export function ProfileCard({ profile, disabled }: ProfileCardProps) {
               onClick={handleExport}
               disabled={exportProfile.isPending}
               aria-label={t('profiles.card.export')}
+              data-tip="Export this voice with its samples as a .voicebox.zip file"
             />
             <CircleButton
               icon={Edit}

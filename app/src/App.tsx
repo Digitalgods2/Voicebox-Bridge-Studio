@@ -2,6 +2,7 @@ import { RouterProvider } from '@tanstack/react-router';
 import { useEffect, useRef, useState } from 'react';
 import appLogo from '@/assets/app-logo.png';
 import { DictateWindow } from '@/components/DictateWindow/DictateWindow';
+import { GlobalTooltips } from '@/components/GlobalTooltips/GlobalTooltips';
 import ShinyText from '@/components/ShinyText';
 import { TitleBarDragRegion } from '@/components/TitleBarDragRegion';
 import { useAutoUpdater } from '@/hooks/useAutoUpdater';
@@ -299,7 +300,12 @@ function MainApp() {
     );
   }
 
-  return <RouterProvider router={router} />;
+  return (
+    <>
+      <RouterProvider router={router} />
+      <GlobalTooltips />
+    </>
+  );
 }
 
 export default App;

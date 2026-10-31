@@ -137,6 +137,7 @@ export function GenerationPage() {
               variant="outline"
               size="sm"
               onClick={openGenerationsFolder}
+              data-tip="Open the folder where generated audio is saved"
               disabled={opening || !generationsPath}
             >
               <FolderOpen className="h-3.5 w-3.5 mr-1.5" />

@@ -56,7 +56,11 @@ export function EffectsList() {
         <ListPaneTitleRow>
           <ListPaneTitle>{t('effects.title')}</ListPaneTitle>
           <ListPaneActions>
-            <Button onClick={handleCreateNew} size="sm">
+            <Button
+              onClick={handleCreateNew}
+              size="sm"
+              data-tip="Create a new effect chain preset"
+            >
               <Plus className="mr-2 h-4 w-4" />
               {t('effects.newPreset')}
             </Button>

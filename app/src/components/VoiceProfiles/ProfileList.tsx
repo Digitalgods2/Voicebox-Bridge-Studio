@@ -73,7 +73,10 @@ export function ProfileList() {
             <CardContent className="flex flex-col items-center justify-center py-12">
               <Mic className="h-12 w-12 text-muted-foreground mb-4" />
               <p className="text-muted-foreground mb-4">{t('profiles.list.empty')}</p>
-              <Button onClick={() => setDialogOpen(true)}>
+              <Button
+                onClick={() => setDialogOpen(true)}
+                data-tip="Create a voice profile by cloning a recording or uploading samples"
+              >
                 <Sparkles className="mr-2 h-4 w-4" />
                 {t('profiles.list.createVoice')}
               </Button>

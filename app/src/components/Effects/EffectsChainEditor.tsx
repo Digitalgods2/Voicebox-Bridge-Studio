@@ -39,6 +39,46 @@ interface EffectWithId extends EffectConfig {
 }
 
 let nextId = 0;
+/** Tooltip explanations for each effect and its settings, keyed by backend effect type. */
+const EFFECT_TIPS: Record<string, string> = {
+  chorus:
+    'Mixes in a slightly delayed, wavering copy of the voice. Short centre delays (under 10 ms) give a flanger; longer ones a chorus.',
+  reverb: 'Places the voice in a simulated room.',
+  delay: 'Repeats the voice as distinct echoes.',
+  compressor: 'Evens out loud and quiet passages for a steadier level.',
+  gain: 'Makes the voice louder or quieter.',
+  highpass: 'Cuts low frequencies such as rumble and boominess.',
+  lowpass: 'Cuts high frequencies such as hiss and harshness.',
+  pitch_shift: 'Raises or lowers the pitch without changing speed.',
+};
+
+const PARAM_TIPS: Record<string, string> = {
+  'chorus.rate_hz': 'How fast the wavering cycles, in cycles per second',
+  'chorus.depth': 'How far the delay swings; higher is more pronounced',
+  'chorus.feedback': 'Feeds the output back in for a stronger, more metallic sound',
+  'chorus.centre_delay_ms':
+    'Base delay of the copy. Under 10 ms sounds like a flanger, above like a chorus.',
+  'chorus.mix': 'Balance of effect and original: 0 is all original, 1 is all effect',
+  'reverb.room_size': 'Size of the simulated room; larger rings longer',
+  'reverb.damping':
+    'How quickly high frequencies fade in the room; higher sounds softer and darker',
+  'reverb.wet_level': 'Level of the reverberated sound',
+  'reverb.dry_level': 'Level of the original, unprocessed voice',
+  'reverb.width': 'Stereo spread of the reverb: 0 is mono, 1 is fully wide',
+  'delay.delay_seconds': 'Time between the voice and each echo',
+  'delay.feedback': 'How much of each echo repeats again; higher means more repeats',
+  'delay.mix': 'Balance of echoes and original: 0 is all original, 1 is all echo',
+  'compressor.threshold_db':
+    'Level above which compression starts; lower compresses more of the signal',
+  'compressor.ratio': 'How strongly levels above the threshold are reduced, such as 4:1',
+  'compressor.attack_ms': 'How quickly compression engages when the voice gets loud',
+  'compressor.release_ms': 'How quickly compression lets go after the voice gets quieter',
+  'gain.gain_db': 'Volume change in decibels; +6 dB is roughly twice as loud',
+  'highpass.cutoff_frequency_hz': 'Frequencies below this are removed',
+  'lowpass.cutoff_frequency_hz': 'Frequencies above this are removed',
+  'pitch_shift.semitones': 'Pitch change in semitones; 12 is one octave',
+};
+
 function makeId() {
   return `fx-${++nextId}`;
 }
@@ -178,7 +218,10 @@ export function EffectsChainEditor({
               if (preset) loadPreset(preset);
             }}
           >
-            <SelectTrigger className="h-8 flex-1 text-xs focus:ring-0 focus:ring-offset-0">
+            <SelectTrigger
+              className="h-8 flex-1 text-xs focus:ring-0 focus:ring-offset-0"
+              data-tip="Replace the chain with a built-in or saved preset"
+            >
               <SelectValue placeholder={t('effects.chain.loadPreset')} />
             </SelectTrigger>
             <SelectContent>
@@ -209,6 +252,7 @@ export function EffectsChainEditor({
               size="sm"
               className="h-8 px-2 text-xs text-muted-foreground"
               onClick={clearAll}
+              data-tip="Remove every effect from the chain"
             >
               {t('effects.chain.clear')}
             </Button>
@@ -239,7 +283,10 @@ export function EffectsChainEditor({
       {/* Add effect */}
       {availableEffects && (
         <Select onValueChange={addEffect}>
-          <SelectTrigger className="h-8 border-dashed text-xs text-muted-foreground focus:ring-0 focus:ring-offset-0">
+          <SelectTrigger
+            className="h-8 border-dashed text-xs text-muted-foreground focus:ring-0 focus:ring-offset-0"
+            data-tip="Add an effect to the end of the chain. Effects run from top to bottom."
+          >
             <Plus className="mr-1 h-3.5 w-3.5" />
             <SelectValue placeholder={t('effects.chain.addEffect')} />
           </SelectTrigger>
@@ -313,6 +360,7 @@ function SortableEffectItem({
           type="button"
           className="p-0.5 text-muted-foreground hover:text-foreground"
           onClick={onToggleExpand}
+          data-tip="Show or hide this effect's settings"
         >
           {isExpanded ? (
             <ChevronDown className="h-3.5 w-3.5" />
@@ -324,6 +372,7 @@ function SortableEffectItem({
         <button
           type="button"
           className="p-0.5 text-muted-foreground/80 hover:text-muted-foreground cursor-grab active:cursor-grabbing touch-none"
+          data-tip="Drag to reorder. Effects run from top to bottom."
           {...attributes}
           {...listeners}
         >
@@ -332,6 +381,7 @@ function SortableEffectItem({
 
         <span
           className={cn('flex-1 text-xs font-medium', !effect.enabled && 'text-muted-foreground')}
+          data-tip={EFFECT_TIPS[effect.type] ?? effectDef?.description}
         >
           {label}
         </span>
@@ -366,7 +416,10 @@ function SortableEffectItem({
             return (
               <div key={paramName} className="space-y-1">
                 <div className="flex items-center justify-between">
-                  <Label className="text-[11px] text-muted-foreground">
+                  <Label
+                    className="text-[11px] text-muted-foreground"
+                    data-tip={PARAM_TIPS[`${effect.type}.${paramName}`]}
+                  >
                     {t(`effects.types.${effect.type}.params.${paramName}`, {
                       defaultValue: paramDef.description,
                     })}

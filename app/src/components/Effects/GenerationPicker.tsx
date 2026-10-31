@@ -41,6 +41,7 @@ export function GenerationPicker({ selectedId, onSelect, className }: Generation
           variant="outline"
           size="sm"
           className={cn('h-8 justify-between gap-2 text-xs font-normal', className)}
+          data-tip="Pick an existing generation to audition the effect chain on"
         >
           {selectedGeneration ? (
             <span className="truncate">

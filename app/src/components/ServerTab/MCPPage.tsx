@@ -257,6 +257,7 @@ export function MCPPage() {
             <Button
               size="sm"
               onClick={handleAdd}
+              data-tip="Bind this MCP client to the chosen voice, so it speaks in that voice by default"
               disabled={!newClientId.trim() || adding}
             >
               {t('settings.mcp.bindings.add.action')}
@@ -332,7 +333,12 @@ function SnippetRow({
           <div className="text-sm font-medium">{title}</div>
           <div className="text-xs text-muted-foreground">{description}</div>
         </div>
-        <Button size="sm" variant="outline" onClick={copy}>
+        <Button
+          size="sm"
+          variant="outline"
+          onClick={copy}
+          data-tip="Copy this setup snippet to the clipboard"
+        >
           {copied ? (
             <>
               <Check className="h-3.5 w-3.5 mr-1.5" />

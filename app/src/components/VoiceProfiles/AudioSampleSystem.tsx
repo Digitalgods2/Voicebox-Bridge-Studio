@@ -94,6 +94,7 @@ export function AudioSampleSystem({
                   type="button"
                   variant="outline"
                   onClick={onTranscribe}
+                  data-tip="Fill in the reference text automatically by transcribing the sample locally with Whisper"
                   disabled={isTranscribing}
                   className="flex items-center gap-2"
                 >

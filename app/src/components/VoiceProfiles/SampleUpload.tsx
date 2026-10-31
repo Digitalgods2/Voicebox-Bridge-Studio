@@ -319,7 +319,9 @@ export function SampleUpload({ profileId, open, onOpenChange }: SampleUploadProp
               name="referenceText"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Reference Text</FormLabel>
+                  <FormLabel data-tip="The exact words spoken in the sample. Accurate text gives a better clone.">
+                    Reference Text
+                  </FormLabel>
                   <FormControl>
                     <Textarea
                       placeholder="Enter the exact text spoken in the audio..."

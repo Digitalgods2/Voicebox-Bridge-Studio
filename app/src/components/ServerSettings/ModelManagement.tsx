@@ -473,6 +473,7 @@ export function ModelManagement() {
                 variant="ghost"
                 size="sm"
                 className="text-xs text-muted-foreground h-7 px-2"
+                data-tip="Open the folder where models are stored"
                 onClick={async () => {
                   try {
                     await platform.filesystem.openPath(cacheDir.path);
@@ -488,6 +489,7 @@ export function ModelManagement() {
                 variant="ghost"
                 size="sm"
                 className="text-xs text-muted-foreground h-7 px-2"
+                data-tip="Move downloaded models to a different folder. Existing models are moved there."
                 onClick={async () => {
                   try {
                     const newDir = await platform.filesystem.pickDirectory(
@@ -513,6 +515,7 @@ export function ModelManagement() {
                   variant="ghost"
                   size="sm"
                   className="text-xs text-muted-foreground h-7 px-2"
+                  data-tip="Store models in the default folder again"
                   disabled={migrating}
                   onClick={async () => {
                     setCustomModelsDir(null);
@@ -548,6 +551,7 @@ export function ModelManagement() {
                       key={model.model_name}
                       type="button"
                       onClick={() => openModelDetail(model)}
+                      data-tip="Show details, size, license, and actions for this model"
                       className="w-full flex items-center gap-3 px-3 py-2.5 text-left hover:bg-muted/50 transition-colors group"
                     >
                       {/* Status indicator */}
@@ -620,6 +624,7 @@ export function ModelManagement() {
                 <button
                   type="button"
                   onClick={() => setConsoleOpen((v) => !v)}
+                  data-tip="Show or hide details of recent model errors"
                   className="flex items-center gap-2 hover:text-foreground transition-colors"
                 >
                   {consoleOpen ? (
@@ -637,6 +642,7 @@ export function ModelManagement() {
                   variant="ghost"
                   className="h-6 px-2 text-xs text-muted-foreground hover:text-foreground"
                   onClick={() => clearAllMutation.mutate()}
+                  data-tip="Dismiss all listed model errors"
                   disabled={clearAllMutation.isPending}
                 >
                   <RotateCcw className="h-3 w-3 mr-1" />
@@ -818,6 +824,7 @@ export function ModelManagement() {
                       <Button
                         size="sm"
                         onClick={() => handleDownload(freshSelectedModel.model_name)}
+                        data-tip="Try the failed download again"
                         variant="outline"
                         className="flex-1"
                       >
@@ -827,6 +834,7 @@ export function ModelManagement() {
                       <Button
                         size="sm"
                         onClick={() => handleCancel(freshSelectedModel.model_name)}
+                        data-tip="Stop this download"
                         variant="ghost"
                         disabled={
                           cancelMutation.isPending &&
@@ -860,6 +868,7 @@ export function ModelManagement() {
                       <Button
                         size="sm"
                         onClick={() => handleCancel(freshSelectedModel.model_name)}
+                        data-tip="Stop this download"
                         variant="ghost"
                         disabled={
                           cancelMutation.isPending &&
@@ -875,6 +884,7 @@ export function ModelManagement() {
                         <Button
                           size="sm"
                           onClick={() => unloadMutation.mutate(freshSelectedModel.model_name)}
+                          data-tip="Free the GPU or system memory this model is using. It stays downloaded."
                           variant="outline"
                           disabled={unloadMutation.isPending}
                           className="flex-1"
@@ -916,6 +926,7 @@ export function ModelManagement() {
                     <Button
                       size="sm"
                       onClick={() => handleDownload(freshSelectedModel.model_name)}
+                      data-tip="Download this model to this computer. Check its size first; it runs offline afterwards."
                       className="flex-1"
                     >
                       <Download className="h-4 w-4 mr-2" />

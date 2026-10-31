@@ -1189,7 +1189,7 @@ export function StoryTrackEditor({ storyId, items }: StoryTrackEditorProps) {
                   size="icon"
                   className="h-7 w-7"
                   onClick={handleRegenerate}
-                  title="Regenerate"
+                  title="Regenerate this clip with the same text and voice"
                   aria-label="Regenerate clip"
                 >
                   <RotateCcw className="h-4 w-4" />
@@ -1203,7 +1203,7 @@ export function StoryTrackEditor({ storyId, items }: StoryTrackEditorProps) {
                       <Button
                         variant="ghost"
                         className="h-7 gap-1.5 px-2 text-xs"
-                        title="Change version/take"
+                        title="Choose which version or take of this clip plays in the story"
                       >
                         <GalleryVerticalEnd className="h-3.5 w-3.5" />
                         <span className="max-w-[80px] truncate">
@@ -1287,6 +1287,7 @@ export function StoryTrackEditor({ storyId, items }: StoryTrackEditorProps) {
               style={{ width: `${timelineWidth}px` }}
               onClick={handleTimelineClick}
               aria-label="Seek timeline"
+              data-tip-off
             >
               {timeMarkers.map((ms) => (
                 <div
@@ -1373,6 +1374,7 @@ export function StoryTrackEditor({ storyId, items }: StoryTrackEditorProps) {
                 className="absolute inset-0 z-0 cursor-pointer"
                 onClick={handleTimelineClick}
                 aria-label="Seek timeline"
+                data-tip-off
               />
 
               {/* Audio clips */}

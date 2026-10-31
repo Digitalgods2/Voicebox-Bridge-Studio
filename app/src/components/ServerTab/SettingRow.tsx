@@ -54,7 +54,12 @@ export function SettingRow({
           </label>
           {description && <p className="text-sm text-muted-foreground mt-0.5">{description}</p>}
         </div>
-        {action && <div className="shrink-0">{action}</div>}
+        {/* The control repeats the row's description as a tooltip, since the text sits far to its left. */}
+        {action && (
+          <div className="shrink-0" data-tip={description}>
+            {action}
+          </div>
+        )}
       </div>
       {children && <div className="mt-3">{children}</div>}
     </div>

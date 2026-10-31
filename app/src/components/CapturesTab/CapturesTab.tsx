@@ -571,6 +571,7 @@ export function CapturesTab() {
                   <Button
                     variant="outline"
                     onClick={handleUploadClick}
+                    data-tip="Import an audio file and transcribe it locally"
                     disabled={session.isUploading}
                   >
                     {session.isUploading ? (
@@ -590,6 +591,7 @@ export function CapturesTab() {
             {(readiness.canRecord || session.isRecording) && (
               <Button
                 onClick={session.toggleRecording}
+                data-tip="Start or stop recording from your microphone; it is transcribed when you stop"
                 disabled={session.isUploading && !session.isRecording}
                 className="relative overflow-hidden transition-all bg-accent text-accent-foreground hover:bg-accent/90"
               >
@@ -643,6 +645,7 @@ export function CapturesTab() {
                 <button
                   type="button"
                   onClick={() => setShowRefined(true)}
+                  data-tip="Show the cleaned-up (refined) transcript"
                   disabled={!selected.transcript_refined}
                   className={cn(
                     'px-3 py-1 text-xs font-medium rounded transition-colors',
@@ -657,6 +660,7 @@ export function CapturesTab() {
                 <button
                   type="button"
                   onClick={() => setShowRefined(false)}
+                  data-tip="Show the original transcript exactly as recognised"
                   className={cn(
                     'px-3 py-1 text-xs font-medium rounded transition-colors',
                     !showRefined || !selected.transcript_refined
@@ -699,6 +703,7 @@ export function CapturesTab() {
                   variant="outline"
                   size="sm"
                   onClick={() => handlePlayAs()}
+                  data-tip="Speak this transcript in a voice with text-to-speech"
                   disabled={!playAsVoice || playAsMutation.isPending}
                   className={cn(
                     'gap-2 rounded-r-none border-r-0 pr-3 pl-2 transition-colors',
@@ -738,6 +743,7 @@ export function CapturesTab() {
                           'border-accent/50 bg-accent/10 hover:bg-accent/15 hover:text-foreground hover:border-accent/50',
                       )}
                       disabled={!profiles || !profiles.length}
+                      data-tip="Choose which voice speaks the transcript"
                     >
                       <ChevronDown className="h-3.5 w-3.5 opacity-70" />
                     </Button>
@@ -767,7 +773,12 @@ export function CapturesTab() {
                   </DropdownMenuContent>
                 </DropdownMenu>
               </div>
-              <Button variant="outline" size="sm" onClick={handleCopy}>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleCopy}
+                data-tip="Copy the transcript to the clipboard"
+              >
                 <Copy className="h-3.5 w-3.5 mr-1.5" />
                 {t('captures.actions.copy')}
               </Button>
@@ -775,6 +786,7 @@ export function CapturesTab() {
                 variant="outline"
                 size="sm"
                 onClick={() => session.refine(selected.id)}
+                data-tip="Clean up punctuation, casing, and filler words using the language model set in Settings > Captures"
                 disabled={session.isRefining}
               >
                 {session.isRefining ? (
@@ -788,7 +800,11 @@ export function CapturesTab() {
               </Button>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="outline" size="sm">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    data-tip="Save the audio, the transcript, or a Markdown note as a file"
+                  >
                     <Download className="h-3.5 w-3.5 mr-1.5" />
                     {t('captures.actions.export')}
                     <ChevronDown className="h-3.5 w-3.5 ml-1 opacity-70" />
@@ -818,6 +834,7 @@ export function CapturesTab() {
                 variant="ghost"
                 size="sm"
                 onClick={() => setDeleteDialogOpen(true)}
+                data-tip="Delete this capture's audio and transcript (asks first)"
                 disabled={deleteMutation.isPending}
                 className="text-muted-foreground "
               >

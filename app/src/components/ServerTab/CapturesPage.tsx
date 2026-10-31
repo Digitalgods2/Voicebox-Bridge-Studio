@@ -283,6 +283,7 @@ export function CapturesPage() {
                 size="sm"
                 disabled={!hotkeyEnabled}
                 onClick={() => setChordEditor('push')}
+                data-tip="Change the hold-to-talk shortcut"
               >
                 <Keyboard className="h-3.5 w-3.5 mr-1.5" />
                 {t('settings.captures.dictation.pushToTalk.change')}
@@ -302,6 +303,7 @@ export function CapturesPage() {
                 size="sm"
                 disabled={!hotkeyEnabled}
                 onClick={() => setChordEditor('toggle')}
+                data-tip="Change the press-to-start, press-to-stop shortcut"
               >
                 <Keyboard className="h-3.5 w-3.5 mr-1.5" />
                 {t('settings.captures.dictation.toggle.change')}
@@ -657,6 +659,7 @@ export function CapturesPage() {
               variant="outline"
               size="sm"
               onClick={openCapturesFolder}
+              data-tip="Open the folder where captures are saved"
               disabled={opening || !capturesPath}
             >
               <FolderOpen className="h-3.5 w-3.5 mr-1.5" />

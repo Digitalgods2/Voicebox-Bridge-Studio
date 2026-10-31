@@ -328,3 +328,105 @@
   animation-play-state: paused !important;
   background-color: hsl(var(--muted-foreground)) !important;
 }
+
+/* Global tooltip layer (components/GlobalTooltips). Fixed to the viewport above every
+   card, column, dialog, and menu; never intercepts the pointer. */
+.studio-tooltip {
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 2147483647;
+  max-width: min(320px, calc(100vw - 16px));
+  pointer-events: none;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(2px);
+  transition:
+    opacity 120ms ease,
+    transform 120ms ease,
+    visibility 0s linear 120ms;
+}
+
+.studio-tooltip[data-side='bottom'] {
+  transform: translateY(-2px);
+}
+
+.studio-tooltip[data-side='right'] {
+  transform: translateX(-2px);
+}
+
+.studio-tooltip[data-side='left'] {
+  transform: translateX(2px);
+}
+
+.studio-tooltip[data-open='true'] {
+  opacity: 1;
+  visibility: visible;
+  transform: none;
+  transition:
+    opacity 120ms ease,
+    transform 120ms ease;
+}
+
+.studio-tooltip__body {
+  padding: 0.4rem 0.65rem;
+  border: 1px solid hsl(var(--accent) / 0.45);
+  border-radius: calc(var(--radius) - 2px);
+  background: hsl(var(--popover));
+  color: hsl(var(--popover-foreground));
+  box-shadow:
+    0 10px 28px rgb(0 0 0 / 0.65),
+    0 0 0 1px rgb(0 0 0 / 0.4);
+  font-size: 0.75rem;
+  line-height: 1.4;
+  white-space: pre-line;
+  overflow-wrap: anywhere;
+}
+
+.studio-tooltip__arrow {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  margin-left: -4px;
+  background: hsl(var(--popover));
+  border: 1px solid hsl(var(--accent) / 0.45);
+  transform: rotate(45deg);
+}
+
+.studio-tooltip[data-side='top'] .studio-tooltip__arrow {
+  bottom: -4px;
+  border-top: none;
+  border-left: none;
+}
+
+.studio-tooltip[data-side='bottom'] .studio-tooltip__arrow {
+  top: -4px;
+  border-bottom: none;
+  border-right: none;
+}
+
+.studio-tooltip[data-side='right'] .studio-tooltip__arrow,
+.studio-tooltip[data-side='left'] .studio-tooltip__arrow {
+  margin-left: 0;
+  margin-top: -4px;
+}
+
+.studio-tooltip[data-side='right'] .studio-tooltip__arrow {
+  left: -4px;
+  border-top: none;
+  border-right: none;
+}
+
+.studio-tooltip[data-side='left'] .studio-tooltip__arrow {
+  right: -4px;
+  border-bottom: none;
+  border-left: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .studio-tooltip,
+  .studio-tooltip[data-open='true'] {
+    transition: none;
+    transform: none;
+  }
+}

@@ -67,8 +67,9 @@ export function useModelDownloadToast({
     });
     toastIdRef.current = toastResult.id;
     toastUpdateRef.current = toastResult.update;
-    // Until the first progress event arrives the toast only says "Connecting".
-    let receivedProgress = false;
+    // Set once the toast shows a final state (complete, failed, or lost connection) that
+    // closes itself. Until then it has an infinite duration.
+    let finished = false;
 
     // Subscribe to progress updates via Server-Sent Events
     const eventSourceUrl = `${serverUrl}/models/progress/${modelName}`;
@@ -83,7 +84,6 @@ export function useModelDownloadToast({
       console.log('[useModelDownloadToast] Received SSE message:', event.data);
       try {
         const progress = JSON.parse(event.data) as ModelProgress;
-        receivedProgress = true;
 
         // Update toast with progress
         if (toastIdRef.current && toastUpdateRef.current) {
@@ -144,6 +144,7 @@ export function useModelDownloadToast({
           const isError = progress.status === 'error';
 
           if (isComplete || isError) {
+            finished = true;
             console.log('[useModelDownloadToast] Download finished:', {
               isComplete,
               isError,
@@ -186,6 +187,7 @@ export function useModelDownloadToast({
       console.log('[useModelDownloadToast] EventSource readyState:', eventSource.readyState);
       eventSource.close();
       eventSourceRef.current = null;
+      finished = true;
 
       // Show error toast
       if (toastIdRef.current && toastUpdateRef.current) {
@@ -209,9 +211,10 @@ export function useModelDownloadToast({
         eventSourceRef.current.close();
         eventSourceRef.current = null;
       }
-      // A toast that already showed progress may still be showing its completion state, so it
-      // stays. One still saying "Connecting" would never change again; dismiss it.
-      if (!receivedProgress) toastResult.dismiss();
+      // A toast showing its final state closes itself. One still in progress would never
+      // change again once nothing tracks it (for example the task was cleared on the
+      // server without a final event), so dismiss it.
+      if (!finished) toastResult.dismiss();
     };
   }, [enabled, serverUrl, modelName, displayName, toast, formatBytes, onComplete, onError]);
 

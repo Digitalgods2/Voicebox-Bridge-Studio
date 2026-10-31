@@ -476,8 +476,13 @@ async def trigger_model_download(request: models.ModelDownloadRequest):
             if asyncio.iscoroutine(result):
                 await result
             task_manager.complete_download(request.model_name)
+            # The "Connecting" entry above is only closed by the backend's loader when it
+            # actually downloads. When every file is already cached (for example a retry
+            # after a partial download), close it here or it stays "downloading" forever.
+            progress_manager.mark_complete(request.model_name)
         except Exception as e:
             task_manager.error_download(request.model_name, str(e))
+            progress_manager.mark_error(request.model_name, str(e))
 
     task_manager.start_download(request.model_name)
 

@@ -61,7 +61,7 @@ OpenVoice V2 (MIT) is the installed engine; see `docs/sts/engine-audit.md`. Seed
 
 ## Current status (2026-10-30)
 
-- Merge complete on branch `voicebox-merge`. STS tests pass (80) in a lightweight Python 3.12 env; frontend typecheck, Biome, and the production web build pass.
+- Merge complete and on `main` (the `voicebox-merge` working branch was deleted after merging). STS tests pass (80) in a lightweight Python 3.12 env; frontend typecheck, Biome, and the production web build pass.
 - A real GPU conversion through `/sts/audio/jobs` using imported workspace profiles completed with exact source duration and was fully decoded.
 - The full backend is installed in `backend/venv` (`just setup-python`, CUDA torch). The merged app was launched through `VoiceBoxBridgeStudio.exe`: one server on 17493 served the UI, the 9 imported voices through both `/profiles` and `/sts/voices`, and a live STS job with exact duration.
 - No TTS model weights are present: the user's Hugging Face cache had been cleared before the merge (only lock folders remained). They must be re-downloaded from the Models tab, with the user's approval of each size.
